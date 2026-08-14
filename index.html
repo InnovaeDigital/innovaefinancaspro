@@ -234,6 +234,14 @@
                     </div>
                 </div>
 
+                <!-- KEEP ME LOGGED IN OPTION -->
+                <div class="flex items-center justify-between text-xs py-1">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" id="loginKeepMe" checked class="rounded border-zinc-800 text-yellow-400 focus:ring-yellow-400 bg-zinc-950 w-4 h-4 cursor-pointer">
+                        <span class="text-zinc-300 font-semibold">Manter-me conectado neste dispositivo</span>
+                    </label>
+                </div>
+
                 <div id="loginError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 p-2.5 rounded-xl font-semibold text-center">
                     Senha incorreta. Tente novamente.
                 </div>
@@ -1104,6 +1112,7 @@
         const CLOUD_ACCESS_KEY = '$2a$10$aQizQ/cW0Nm5g6oVYEeRo./tFqUbbzj8TrDPdViFiKxeDBszlkj9S';
         const SHARED_MASTER_BIN_ID = '67ad840be4101579cf43f389';
         const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
+        const SESSION_STORAGE_KEY = 'innovae_pro_active_session_v3';
 
         // Pre-seeded Owner Account
         const OWNER_USER = {
@@ -1155,6 +1164,27 @@
             initPWA();
             await syncFromCloudRealtime(false);
             populateLoginUserSelect();
+            
+            // Check for persistent saved session on startup/reload
+            const savedUser = restoreSavedSession();
+            if (savedUser) {
+                currentUser = savedUser;
+                if (allCloudUserDataMap[currentUser.id]) {
+                    appData = allCloudUserDataMap[currentUser.id];
+                    if (!appData.goals) appData.goals = [];
+                    if (!appData.budgets) appData.budgets = {};
+                } else {
+                    // Try local cache fallback
+                    const localCache = localStorage.getItem(`innovae_cache_${currentUser.id}`);
+                    if (localCache) {
+                        try {
+                            appData = JSON.parse(localCache);
+                        } catch(e) {}
+                    }
+                }
+                startUserSession(false); // Restore session seamlessly without splash screen
+            }
+
             startRealTimeCloudPolling();
             safeCreateIcons();
 
@@ -1168,6 +1198,43 @@
                 syncFromCloudRealtime(true);
             });
         });
+
+        function restoreSavedSession() {
+            try {
+                const sessionRaw = localStorage.getItem(SESSION_STORAGE_KEY) || sessionStorage.getItem(SESSION_STORAGE_KEY);
+                if (sessionRaw) {
+                    const sessionData = JSON.parse(sessionRaw);
+                    if (sessionData && sessionData.userId) {
+                        return registeredUsers.find(u => u.id === sessionData.userId) || null;
+                    }
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function saveSessionState(user, keepLoggedIn) {
+            const sessionData = { userId: user.id, loggedAt: new Date().toISOString() };
+            if (keepLoggedIn) {
+                localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+                sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            } else {
+                sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+                localStorage.removeItem(SESSION_STORAGE_KEY);
+            }
+        }
+
+        function clearSessionState() {
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+        }
+
+        function cacheUserLocalFallback() {
+            if (currentUser && appData) {
+                try {
+                    localStorage.setItem(`innovae_cache_${currentUser.id}`, JSON.stringify(appData));
+                } catch(e) {}
+            }
+        }
 
         // PURE CLOUD ENGINE - OPTIMIZED SILENT REALTIME READ & WRITE WITH CACHE-BUSTING
         async function syncFromCloudRealtime(isSilent = true) {
@@ -1211,6 +1278,7 @@
                                     appData = newUserData;
                                     if (!appData.goals) appData.goals = [];
                                     if (!appData.budgets) appData.budgets = {};
+                                    cacheUserLocalFallback();
                                     updateUI();
                                 }
                             }
@@ -1237,6 +1305,7 @@
                 if (currentUser) {
                     allCloudUserDataMap[currentUser.id] = appData;
                     lastSyncedDataHash = JSON.stringify(appData);
+                    cacheUserLocalFallback();
                 }
 
                 const payload = {
@@ -1272,228 +1341,11 @@
             }
         }
 
-        function startRealTimeCloudPolling() {
-            if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
-            // Poll silently every 4 seconds when active, 12 seconds when inactive
-            realTimeCloudTimer = setInterval(async () => {
-                const intervalTime = document.visibilityState === 'visible' ? 4000 : 12000;
-                await syncFromCloudRealtime(true);
-            }, 4000);
-        }
-
-        function updateCloudUIState(state) {
-            const badge = document.getElementById('cloudSyncBadge');
-            const text = document.getElementById('cloudStatusText');
-            if (!badge || !text) return;
-
-            if (state === 'syncing') {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
-                text.textContent = "Sincronizando Nuvem ⚡";
-            } else if (state === 'synced') {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
-                text.textContent = "Nuvem em Tempo Real ⚡";
-            } else {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-zinc-400";
-                text.textContent = "Reconectando Nuvem...";
-            }
-        }
-
-        function populateLoginUserSelect() {
-            const select = document.getElementById('loginUserSelect');
-            if (!select) return;
-            
-            const currentSelectedVal = select.value;
-            select.innerHTML = '';
-
-            registeredUsers.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id;
-                opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : (u.role === 'admin' ? ' (admin)' : ''));
-                select.appendChild(opt);
-            });
-
-            if (currentSelectedVal && Array.from(select.options).some(o => o.value === currentSelectedVal)) {
-                select.value = currentSelectedVal;
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            initPWA();
-            await syncFromCloudRealtime();
-            populateLoginUserSelect();
-            startRealTimeCloudPolling();
-            safeCreateIcons();
-        });
-
-        // PURE CLOUD ENGINE - 100% REALTIME READ & WRITE WITH CACHE-BUSTING
-        async function syncFromCloudRealtime() {
-            updateCloudUIState('syncing');
-            try {
-                // Force cache-busting to prevent browsers from returning stale cached JSON responses
-                const cacheBuster = Date.now();
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest?cb=${cacheBuster}`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Master-Key': CLOUD_MASTER_KEY,
-                        'X-Access-Key': CLOUD_ACCESS_KEY
-                    },
-                    cache: 'no-store'
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    const record = data.record || data;
-                    if (record) {
-                        if (record.users && Array.isArray(record.users)) {
-                            const map = new Map();
-                            map.set(OWNER_USER.id, OWNER_USER);
-                            record.users.forEach(u => map.set(u.id, u));
-                            registeredUsers = Array.from(map.values());
-                            populateLoginUserSelect();
-                        }
-
-                        if (record.allUserData) {
-                            allCloudUserDataMap = record.allUserData;
-                            if (currentUser && allCloudUserDataMap[currentUser.id]) {
-                                appData = allCloudUserDataMap[currentUser.id];
-                                if (!appData.goals) appData.goals = [];
-                                if (!appData.budgets) appData.budgets = {};
-                                updateUI();
-                            }
-                        }
-                    }
-                    updateCloudUIState('synced');
-                } else {
-                    updateCloudUIState('local');
-                }
-            } catch(e) {
-                console.warn('Realtime cloud sync polling error:', e);
-                updateCloudUIState('local');
-            }
-        }
-
-        async function pushDataToCloud() {
-            updateCloudUIState('syncing');
-            try {
-                if (currentUser) {
-                    allCloudUserDataMap[currentUser.id] = appData;
-                }
-
-                const payload = {
-                    users: registeredUsers,
-                    allUserData: allCloudUserDataMap,
-                    updatedAt: new Date().toISOString()
-                };
-
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': CLOUD_MASTER_KEY,
-                        'X-Access-Key': CLOUD_ACCESS_KEY
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    updateCloudUIState('synced');
-                } else {
-                    updateCloudUIState('local');
-                }
-            } catch(e) {
-                updateCloudUIState('local');
-            }
-        }
-
-        function startRealTimeCloudPolling() {
-            if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
-            // Ultra-fast real-time sync loop every 2.5 seconds across devices
-            realTimeCloudTimer = setInterval(async () => {
-                await syncFromCloudRealtime();
-            }, 2500);
-        }
-
-        function updateCloudUIState(state) {
-            const badge = document.getElementById('cloudSyncBadge');
-            const text = document.getElementById('cloudStatusText');
-            if (!badge || !text) return;
-
-            if (state === 'syncing') {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
-                text.textContent = "Sincronizando Nuvem ⚡";
-            } else if (state === 'synced') {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
-                text.textContent = "Nuvem em Tempo Real ⚡";
-            } else {
-                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-zinc-400";
-                text.textContent = "Reconectando Nuvem...";
-            }
-        }
-
-        function populateLoginUserSelect() {
-            const select = document.getElementById('loginUserSelect');
-            if (!select) return;
-            
-            const selectedVal = select.value;
-            select.innerHTML = '';
-
-            registeredUsers.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id;
-                opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : (u.role === 'admin' ? ' (admin)' : ''));
-                select.appendChild(opt);
-            });
-
-            if (selectedVal && Array.from(select.options).some(o => o.value === selectedVal)) {
-                select.value = selectedVal;
-            }
-        }
-
-        function initPWA() {
-            try {
-                const manifest = {
-                    name: "Innovae Finanças Pro",
-                    short_name: "Innovae Pro",
-                    start_url: "./",
-                    display: "standalone",
-                    background_color: "#09090b",
-                    theme_color: "#09090b",
-                    orientation: "portrait",
-                    icons: [
-                        { src: "LOGO.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-                        { src: "LOGO.png", sizes: "512x512", type: "image/png" }
-                    ]
-                };
-
-                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-                const manifestUrl = URL.createObjectURL(manifestBlob);
-                
-                let manifestLink = document.querySelector('link[rel="manifest"]');
-                if (!manifestLink) {
-                    manifestLink = document.createElement('link');
-                    manifestLink.rel = 'manifest';
-                    document.head.appendChild(manifestLink);
-                }
-                manifestLink.href = manifestUrl;
-            } catch(e) {}
-        }
-
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function focusTransactionsSearch() {
-            const input = document.getElementById('searchInput');
-            if (input) {
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => input.focus(), 300);
-            }
-        }
-
         function handleLogin(e) {
             e.preventDefault();
             const selectedUserId = document.getElementById('loginUserSelect').value;
             const inputPass = document.getElementById('loginPassword').value.trim();
+            const keepLoggedIn = document.getElementById('loginKeepMe')?.checked ?? true;
             const errorEl = document.getElementById('loginError');
 
             const user = registeredUsers.find(u => u.id === selectedUserId && u.password === inputPass);
@@ -1501,6 +1353,7 @@
             if (user) {
                 errorEl.classList.add('hidden');
                 currentUser = user;
+                saveSessionState(currentUser, keepLoggedIn);
                 
                 if (allCloudUserDataMap[currentUser.id]) {
                     appData = allCloudUserDataMap[currentUser.id];
@@ -1508,6 +1361,7 @@
                 } else {
                     appData = { salaries: {}, transactions: [], goals: [], budgets: {} };
                 }
+                cacheUserLocalFallback();
 
                 playWelcomeAnimation(() => {
                     startUserSession(true);
@@ -1518,36 +1372,9 @@
             }
         }
 
-        function playWelcomeAnimation(callback) {
-            const overlay = document.getElementById('welcomeOverlay');
-            const greeting = document.getElementById('welcomeUserGreeting');
-            const pBar = document.getElementById('welcomeProgressBar');
-
-            if (!overlay) {
-                if (callback) callback();
-                return;
-            }
-
-            greeting.textContent = `Bem-vindo(a), ${currentUser.name}!`;
-            pBar.style.width = '0%';
-            overlay.classList.remove('hidden');
-
-            safeCreateIcons();
-
-            setTimeout(() => { pBar.style.width = '100%'; }, 100);
-
-            setTimeout(() => {
-                overlay.classList.add('opacity-0');
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('opacity-0');
-                    if (callback) callback();
-                }, 400);
-            }, 2200);
-        }
-
         function handleLogout() {
             pushDataToCloud();
+            clearSessionState();
             currentUser = null;
             document.getElementById('loginPassword').value = '';
             document.getElementById('loginScreen').classList.remove('hidden');
