@@ -249,20 +249,20 @@
     </div>
 
     <!-- MAIN DASHBOARD APP SCREEN -->
-    <div id="dashboardScreen" class="hidden min-h-screen p-3 sm:p-6 max-w-7xl mx-auto">
+    <div id="dashboardScreen" class="hidden min-h-screen p-3 sm:p-6 max-w-7xl mx-auto relative">
         
-        <!-- Header Bar -->
-        <header class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80 mb-6">
-            <div class="flex items-center gap-3">
-                <img src="LOGO.png" alt="Innovae Pro Logo" class="h-10 sm:h-12 object-contain hover:scale-105 transition duration-200" onerror="this.onerror=null; this.src='https://placehold.co/120x50/121215/facc15?text=INNOVAE';">
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-black text-zinc-100 tracking-tight flex items-center gap-2">
-                        Innovae Finanças <span class="text-yellow-400">Pro</span>
-                    </h1>
-                    <p class="text-xs text-zinc-400">Gestão Inteligente & Planejamento Financeiro</p>
-                </div>
-            </div>
+        <!-- Ambient Finance Floating Background Elements -->
+        <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-15">
+            <span class="absolute text-yellow-400 text-4xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
+            <span class="absolute text-emerald-400 text-5xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1.5s;">+ %</span>
+            <span class="absolute text-amber-400 text-3xl font-black left-1/3 bottom-1/4 animate-float-money" style="animation-delay: 2.5s;">💰</span>
+            <span class="absolute text-yellow-400 text-6xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 0.8s;">R$</span>
+            <i data-lucide="trending-up" class="w-40 h-40 text-yellow-500/10 absolute top-10 right-1/4 animate-pulse"></i>
+            <i data-lucide="piggy-bank" class="w-48 h-48 text-emerald-500/10 absolute bottom-10 left-10"></i>
+        </div>
 
+        <!-- Header Bar -->
+        <header class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80 mb-6 relative z-10">
             <!-- Global Controls & User Pill -->
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
                 
@@ -732,37 +732,53 @@
         </div>
     </div>
 
-    <!-- MODAL 2: Salário / Configuração de Renda -->
-    <div id="salaryModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet animate-modal-enter">
-            <button onclick="closeSalaryModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
+    <!-- MODAL EDIT USER (Editar Dados do Usuário) -->
+    <div id="editUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-zinc-900 border border-yellow-400/30 rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-modal-enter">
+            <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
-            
+
             <div class="flex items-center gap-3 mb-5">
                 <div class="p-2.5 bg-yellow-400/10 text-yellow-400 rounded-xl border border-yellow-400/30">
-                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                    <i data-lucide="user-cog" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-zinc-100">Configurar Renda Mensal</h3>
-                    <p class="text-xs text-zinc-400">Informe seu salário base fixo do mês</p>
+                    <h3 class="text-lg font-bold text-zinc-100">Editar Usuário</h3>
+                    <p class="text-xs text-zinc-400">Atualize as credenciais e permissões da conta</p>
                 </div>
             </div>
 
-            <form id="salaryForm" onsubmit="saveSalary(event)" class="space-y-4">
+            <form id="editUserForm" onsubmit="handleSaveEditUser(event)" class="space-y-3">
+                <input type="hidden" id="editUserId">
+
                 <div>
-                    <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Salário Base Líquido (R$)</label>
-                    <input type="number" step="0.01" id="inputBaseSalary" placeholder="Ex: 3500.00" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">Nome Completo</label>
+                    <input type="text" id="editUserFullName" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-yellow-400">
                 </div>
 
-                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs text-zinc-400">
-                    <i data-lucide="info" class="w-4 h-4 inline mr-1 text-yellow-400"></i>
-                    Receitas adicionais (como bônus ou freelas) podem ser cadastradas como "Nova Transação > Receita Extra".
+                <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">Nome de Usuário / Login</label>
+                    <input type="text" id="editUserUsername" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-yellow-400">
                 </div>
 
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="closeSalaryModal()" class="px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-950 rounded-xl shadow-lg">Salvar Renda</button>
+                <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">Senha de Acesso</label>
+                    <input type="password" id="editUserPassword" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-yellow-400">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-300 mb-1">Tipo de Acesso</label>
+                    <select id="editUserRole" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-yellow-400">
+                        <option value="user">Usuário Padrão</option>
+                        <option value="admin">Administrador</option>
+                        <option value="owner">Proprietário</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-950 rounded-xl shadow-lg">Salvar Alterações</button>
                 </div>
             </form>
         </div>
@@ -1031,7 +1047,7 @@
     </div>
 
     <!-- MOBILE STICKY BOTTOM NAVIGATION BAR -->
-    <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-800/80 py-2.5 px-4 z-40 flex items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.8)]">
+    <nav id="mobileBottomNav" class="hidden sm:hidden fixed bottom-0 left-0 right-0 bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-800/80 py-2.5 px-4 z-40 items-center justify-around shadow-[0_-10px_25px_rgba(0,0,0,0.8)]">
         <button onclick="scrollToTop()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-yellow-400 active:scale-95 transition text-[10px] font-bold">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
             <span>Painel</span>
@@ -1428,6 +1444,150 @@
             populateLoginUserSelect();
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('dashboardScreen').classList.add('hidden');
+            const mobileNav = document.getElementById('mobileBottomNav');
+            if (mobileNav) {
+                mobileNav.classList.add('hidden');
+                mobileNav.classList.remove('flex');
+            }
+        }
+
+        function startUserSession(isNewLogin = false) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+
+            const mobileNav = document.getElementById('mobileBottomNav');
+            if (mobileNav) {
+                mobileNav.classList.remove('hidden');
+                mobileNav.classList.add('flex');
+            }
+
+            document.getElementById('headerUserName').textContent = currentUser.name;
+            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+            
+            const isOwner = currentUser.role === 'owner';
+            const ownerTag = document.getElementById('ownerTag');
+            const btnAdminUsers = document.getElementById('btnAdminUsers');
+
+            if (isOwner) {
+                ownerTag.classList.remove('hidden');
+                btnAdminUsers.classList.remove('hidden');
+                document.getElementById('headerUserRole').textContent = 'Proprietário do Sistema';
+            } else {
+                ownerTag.classList.add('hidden');
+                btnAdminUsers.classList.add('hidden');
+                document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Administrador' : 'Usuário Padrão';
+            }
+
+            loadFromStorage();
+            initCurrentMonth();
+            updateUI(isNewLogin);
+            safeCreateIcons();
+        }
+
+        // Owner-Only User Management
+        function openUsersAdminModal() {
+            if (currentUser.role !== 'owner') {
+                showToast('Acesso negado: Apenas o proprietário pode acessar este painel.', 'red');
+                return;
+            }
+            renderUsersList();
+            document.getElementById('usersAdminModal').classList.remove('hidden');
+        }
+
+        function closeUsersAdminModal() {
+            document.getElementById('usersAdminModal').classList.add('hidden');
+        }
+
+        function renderUsersList() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            registeredUsers.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-zinc-900 transition";
+                
+                const isOwner = u.role === 'owner';
+                const roleBadge = isOwner 
+                    ? `<span class="px-2 py-0.5 rounded bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 font-bold">Proprietário</span>`
+                    : (u.role === 'admin' 
+                        ? `<span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold">Admin</span>`
+                        : `<span class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">Padrão</span>`);
+
+                const actions = `
+                    <div class="flex items-center justify-center gap-1.5">
+                        <button onclick="openEditUserModal('${u.id}')" class="text-yellow-400 hover:text-yellow-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Editar Usuário">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                        ${isOwner ? '' : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Excluir Usuário"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`}
+                    </div>
+                `;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-semibold text-zinc-100">${u.name}</td>
+                    <td class="py-2.5 px-3 text-zinc-400">${u.username}</td>
+                    <td class="py-2.5 px-3">${roleBadge}</td>
+                    <td class="py-2.5 px-3 text-center">${actions}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            safeCreateIcons();
+        }
+
+        function openEditUserModal(userId) {
+            const user = registeredUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUserFullName').value = user.name;
+            document.getElementById('editUserUsername').value = user.username;
+            document.getElementById('editUserPassword').value = user.password;
+            document.getElementById('editUserRole').value = user.role || 'user';
+
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+        }
+
+        async function handleSaveEditUser(e) {
+            e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const name = document.getElementById('editUserFullName').value.trim();
+            const username = document.getElementById('editUserUsername').value.trim();
+            const password = document.getElementById('editUserPassword').value.trim();
+            const role = document.getElementById('editUserRole').value;
+
+            const userIndex = registeredUsers.findIndex(u => u.id === userId);
+            if (userIndex === -1) return;
+
+            const duplicate = registeredUsers.find(u => u.id !== userId && u.username.toLowerCase() === username.toLowerCase());
+            if (duplicate) {
+                showToast('Este nome de usuário já está sendo utilizado por outra conta.', 'red');
+                return;
+            }
+
+            registeredUsers[userIndex] = {
+                ...registeredUsers[userIndex],
+                name,
+                username,
+                password,
+                role
+            };
+
+            if (currentUser && currentUser.id === userId) {
+                currentUser = registeredUsers[userIndex];
+                localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(currentUser));
+                document.getElementById('headerUserName').textContent = currentUser.name;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+            }
+
+            await saveUsersToStorage();
+            closeEditUserModal();
+            renderUsersList();
+            populateLoginUserSelect();
+            showToast(`Dados do usuário ${name} atualizados e salvos na nuvem! ☁️`, 'success');
         }
 
         function handleLogin(e) {
