@@ -127,22 +127,33 @@
         .animate-splash {
             animation: splashZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 35px rgba(250, 204, 21, 0.2); }
+            50% { box-shadow: 0 0 65px rgba(250, 204, 21, 0.45); }
+        }
+        .glow-card {
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen transition-colors duration-200 mobile-bottom-padding antialiased selection:bg-yellow-400 selection:text-zinc-950">
 
-    <!-- FULL-SCREEN WELCOME OVERLAY WITH GLOWING LOGO & LOTTIE ANIMATION -->
-    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/98 backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
+    <!-- FULL-SCREEN WELCOME OVERLAY WITH ADVANCED ANIMATIONS -->
+    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-950/40 via-zinc-950 to-black backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
+        
+        <!-- Floating Financial Particles Background -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <span class="absolute text-yellow-400/20 text-3xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
-            <span class="absolute text-emerald-400/20 text-4xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1s;">+ %</span>
-            <span class="absolute text-amber-400/20 text-3xl font-black left-1/4 bottom-1/4 animate-float-money" style="animation-delay: 2s;">💰</span>
-            <span class="absolute text-yellow-400/20 text-5xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 1.5s;">R$</span>
+            <span class="absolute text-yellow-400/30 text-4xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
+            <span class="absolute text-emerald-400/30 text-5xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1s;">+ %</span>
+            <span class="absolute text-amber-400/30 text-4xl font-black left-1/4 bottom-1/4 animate-float-money" style="animation-delay: 2s;">💰</span>
+            <span class="absolute text-yellow-400/30 text-6xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 1.5s;">📈</span>
+            <span class="absolute text-yellow-300/25 text-3xl font-black left-12 bottom-12 animate-float-money" style="animation-delay: 0.5s;">⭐</span>
         </div>
 
-        <div class="text-center p-6 max-w-md mx-auto relative z-10 animate-splash flex flex-col items-center">
+        <div class="text-center p-8 max-w-lg mx-auto relative z-10 animate-splash flex flex-col items-center bg-zinc-900/80 border border-yellow-400/30 rounded-3xl glow-card backdrop-blur-xl shadow-2xl">
             <!-- Lottie Splash Graphic -->
-            <div class="w-48 h-48 mx-auto -mb-4">
+            <div class="w-44 h-44 mx-auto -mb-2">
                 <lottie-player 
                     src="https://assets10.lottiefiles.com/packages/lf20_m6482pxb.json" 
                     background="transparent" 
@@ -153,23 +164,25 @@
                 </lottie-player>
             </div>
 
+            <!-- Glowing Logo -->
             <div class="inline-block relative mb-3">
-                <div class="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-300 rounded-full blur-xl opacity-60 animate-pulse"></div>
-                <img src="LOGO.png" alt="Innovae Pro Logo" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_10px_25px_rgba(250,204,21,0.5)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+                <div class="absolute -inset-3 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-300 rounded-full blur-2xl opacity-70 animate-pulse"></div>
+                <img src="LOGO.png" alt="Innovae Pro Logo" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_10px_25px_rgba(250,204,21,0.6)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
             </div>
 
-            <div class="space-y-1 mt-1">
+            <div class="space-y-2 mt-1">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-xs font-extrabold text-yellow-400">
-                    <i data-lucide="cloud-lightning" class="w-3.5 h-3.5"></i> Sincronização em Nuvem Ativa
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Conexão em Nuvem Protegida
                 </span>
                 <h2 id="welcomeUserGreeting" class="text-2xl sm:text-3xl font-black tracking-tight text-white">
                     Bem-vindo(a)!
                 </h2>
-                <p class="text-xs text-zinc-400">Conectando ao banco de dados em nuvem em tempo real...</p>
+                <p id="welcomeStatusText" class="text-xs text-zinc-400 font-semibold transition-all">Sincronizando seu painel financeiro em tempo real...</p>
             </div>
 
-            <div class="w-full bg-zinc-900 border border-zinc-800 rounded-full h-2 mt-5 overflow-hidden">
-                <div id="welcomeProgressBar" class="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            <!-- Smooth Dynamic Progress Bar -->
+            <div class="w-full bg-zinc-950 border border-zinc-800 rounded-full h-2.5 mt-6 overflow-hidden shadow-inner">
+                <div id="welcomeProgressBar" class="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 h-2.5 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
             </div>
         </div>
     </div>
@@ -1114,7 +1127,7 @@
         const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
         const SESSION_STORAGE_KEY = 'innovae_pro_active_session_v3';
 
-        // Pre-seeded Owner Account
+        // Pre-seeded Owner Account (HARDCODED SAFEGUARD)
         const OWNER_USER = {
             id: 'usr_owner_david',
             name: 'David P. Tomé',
@@ -1153,6 +1166,56 @@
         let categoryChartInstance = null;
         let pendingConfirmAction = null;
         let realTimeCloudTimer = null;
+
+        function initPWA() {
+            try {
+                const manifest = {
+                    name: "Innovae Finanças Pro",
+                    short_name: "Innovae Pro",
+                    start_url: "./",
+                    display: "standalone",
+                    background_color: "#09090b",
+                    theme_color: "#09090b",
+                    orientation: "portrait",
+                    icons: [
+                        {
+                            src: "LOGO.png",
+                            sizes: "192x192",
+                            type: "image/png",
+                            purpose: "any maskable"
+                        },
+                        {
+                            src: "LOGO.png",
+                            sizes: "512x512",
+                            type: "image/png"
+                        }
+                    ]
+                };
+
+                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                
+                let manifestLink = document.querySelector('link[rel="manifest"]');
+                if (!manifestLink) {
+                    manifestLink = document.createElement('link');
+                    manifestLink.rel = 'manifest';
+                    document.head.appendChild(manifestLink);
+                }
+                manifestLink.href = manifestUrl;
+            } catch(e) {}
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function focusTransactionsSearch() {
+            const input = document.getElementById('searchInput');
+            if (input) {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => input.focus(), 300);
+            }
+        }
 
         function safeCreateIcons() {
             if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
@@ -1199,13 +1262,89 @@
             });
         });
 
+        function populateLoginUserSelect() {
+            const select = document.getElementById('loginUserSelect');
+            if (!select) return;
+
+            const currentSelected = select.value;
+            select.innerHTML = '';
+
+            // Ensure OWNER_USER is always present
+            const userMap = new Map();
+            userMap.set(OWNER_USER.id, OWNER_USER);
+            registeredUsers.forEach(u => {
+                if (u && u.id) userMap.set(u.id, u);
+            });
+            registeredUsers = Array.from(userMap.values());
+
+            registeredUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                let roleTag = u.role === 'owner' ? ' (Proprietário)' : (u.role === 'admin' ? ' (Admin)' : '');
+                opt.textContent = `${u.name}${roleTag}`;
+                select.appendChild(opt);
+            });
+
+            if (currentSelected && registeredUsers.some(u => u.id === currentSelected)) {
+                select.value = currentSelected;
+            } else {
+                select.value = OWNER_USER.id;
+            }
+        }
+
+        function playWelcomeAnimation(onComplete) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const greeting = document.getElementById('welcomeUserGreeting');
+            const progressBar = document.getElementById('welcomeProgressBar');
+            const statusText = document.getElementById('welcomeStatusText');
+
+            if (!overlay) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            greeting.textContent = `Bem-vindo(a), ${currentUser ? currentUser.name : 'Usuário'}!`;
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '1';
+
+            let progress = 0;
+            const steps = [
+                { p: 20, text: "Autenticando credenciais na nuvem..." },
+                { p: 50, text: "Carregando balanço e lançamentos..." },
+                { p: 80, text: "Sincronizando metas & diagnóstico..." },
+                { p: 100, text: "Acesso liberado!" }
+            ];
+
+            let stepIdx = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progressBar) progressBar.style.width = `${progress}%`;
+
+                if (stepIdx < steps.length && progress >= steps[stepIdx].p) {
+                    if (statusText) statusText.textContent = steps[stepIdx].text;
+                    stepIdx++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => {
+                            overlay.classList.add('hidden');
+                            if (onComplete) onComplete();
+                        }, 400);
+                    }, 300);
+                }
+            }, 30);
+        }
+
         function restoreSavedSession() {
             try {
                 const sessionRaw = localStorage.getItem(SESSION_STORAGE_KEY) || sessionStorage.getItem(SESSION_STORAGE_KEY);
                 if (sessionRaw) {
                     const sessionData = JSON.parse(sessionRaw);
                     if (sessionData && sessionData.userId) {
-                        return registeredUsers.find(u => u.id === sessionData.userId) || null;
+                        return registeredUsers.find(u => u.id === sessionData.userId) || OWNER_USER;
                     }
                 }
             } catch(e) {}
@@ -1236,7 +1375,6 @@
             }
         }
 
-        // PURE CLOUD ENGINE - OPTIMIZED SILENT REALTIME READ & WRITE WITH CACHE-BUSTING
         async function syncFromCloudRealtime(isSilent = true) {
             if (!isSilent) {
                 updateCloudUIState('syncing');
@@ -1262,7 +1400,9 @@
                         if (record.users && Array.isArray(record.users)) {
                             const map = new Map();
                             map.set(OWNER_USER.id, OWNER_USER);
-                            record.users.forEach(u => map.set(u.id, u));
+                            record.users.forEach(u => {
+                                if (u && u.id) map.set(u.id, u);
+                            });
                             registeredUsers = Array.from(map.values());
                             populateLoginUserSelect();
                         }
@@ -1299,6 +1439,13 @@
             }
         }
 
+        function startRealTimeCloudPolling() {
+            if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
+            realTimeCloudTimer = setInterval(() => {
+                syncFromCloudRealtime(true);
+            }, 3000);
+        }
+
         async function pushDataToCloud() {
             updateCloudUIState('syncing');
             try {
@@ -1308,8 +1455,15 @@
                     cacheUserLocalFallback();
                 }
 
+                // Enforce OWNER_USER presence before pushing
+                const userMap = new Map();
+                userMap.set(OWNER_USER.id, OWNER_USER);
+                registeredUsers.forEach(u => {
+                    if (u && u.id) userMap.set(u.id, u);
+                });
+
                 const payload = {
-                    users: registeredUsers,
+                    users: Array.from(userMap.values()),
                     allUserData: allCloudUserDataMap,
                     updatedAt: new Date().toISOString()
                 };
@@ -1338,6 +1492,23 @@
                 if (consecutiveCloudErrors > 3) {
                     updateCloudUIState('local');
                 }
+            }
+        }
+
+        function updateCloudUIState(state) {
+            const badge = document.getElementById('cloudSyncBadge');
+            const text = document.getElementById('cloudStatusText');
+            if (!badge || !text) return;
+
+            if (state === 'syncing') {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
+                text.textContent = "Sincronizando...";
+            } else if (state === 'synced') {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
+                text.textContent = "Nuvem em Tempo Real ⚡";
+            } else {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-zinc-400";
+                text.textContent = "Modo Local";
             }
         }
 
@@ -1426,7 +1597,6 @@
             safeCreateIcons();
         }
 
-        // Admin User Management Logic
         function openUsersAdminModal() {
             if (currentUser.role !== 'owner' && currentUser.role !== 'admin') {
                 showToast('Acesso negado: Apenas administradores podem gerenciar usuários.', 'red');
@@ -1460,7 +1630,7 @@
                         <button onclick="openEditUserModal('${u.id}')" class="text-yellow-400 hover:text-yellow-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Editar Usuário">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                         </button>
-                        ${isOwner ? '<span class="text-zinc-500 italic text-[10px] ml-1">Proprietário</span>' : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Excluir Usuário"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`}
+                        ${isOwner ? '<span class="text-zinc-500 italic text-[10px] ml-1">Protegido</span>' : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Excluir Usuário"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`}
                     </div>
                 `;
 
@@ -2089,6 +2259,171 @@
             }
         }
 
+        function openGoalsModal() {
+            renderGoalsList();
+            document.getElementById('goalsModal').classList.remove('hidden');
+        }
+
+        function closeGoalsModal() {
+            document.getElementById('goalsModal').classList.add('hidden');
+        }
+
+        function renderGoalsList() {
+            const container = document.getElementById('goalsListContainer');
+            container.innerHTML = '';
+
+            const goals = appData.goals || [];
+
+            if (goals.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 flex flex-col items-center">
+                        <div class="w-24 h-24 mb-2">
+                            <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_mbe9u1ff.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                        </div>
+                        <p class="text-xs text-zinc-400 font-bold">Nenhuma meta de investimento cadastrada.</p>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">Cadastre objetivos como "Reserva de Emergência", "Viagem" ou "Carro Novo".</p>
+                    </div>
+                `;
+            } else {
+                const now = new Date();
+
+                goals.forEach(g => {
+                    const target = parseFloat(g.targetAmount) || 1;
+                    const current = parseFloat(g.currentAmount) || 0;
+                    const pct = Math.min(100, Math.round((current / target) * 100));
+
+                    const targetDateObj = new Date(g.targetDate + 'T00:00:00');
+                    const monthsDiff = (targetDateObj.getFullYear() - now.getFullYear()) * 12 + (targetDateObj.getMonth() - now.getMonth());
+                    const remainingMonths = Math.max(1, monthsDiff);
+                    const remainingAmount = Math.max(0, target - current);
+                    const monthlySavingsNeeded = remainingAmount / remainingMonths;
+
+                    const div = document.createElement('div');
+                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 hover:border-emerald-500/40 transition duration-300";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-sm text-zinc-100 flex items-center gap-1.5">
+                                    ${g.name}
+                                </h4>
+                                <span class="text-[11px] text-zinc-400">Prazo: <strong class="text-zinc-200">${formatDateBR(g.targetDate)}</strong> (${remainingMonths} mês/meses restantes)</span>
+                            </div>
+                            <button onclick="askDeleteGoal('${g.id}')" class="p-1 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded transition" title="Excluir Meta">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 text-xs">
+                            <div>
+                                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Guardado / Alvo</span>
+                                <strong class="text-emerald-400 font-extrabold">${formatBRL(current)}</strong> <span class="text-zinc-500">/ ${formatBRL(target)}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Guardar por Mês</span>
+                                <strong class="text-yellow-400 font-extrabold">${formatBRL(monthlySavingsNeeded)}/mês</strong>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px]">
+                                <span class="text-zinc-400">Progresso do Objetivo</span>
+                                <span class="font-bold text-emerald-400">${pct}% concluído</span>
+                            </div>
+                            <div class="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden border border-zinc-800">
+                                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-1">
+                            <button onclick="promptDepositGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg flex items-center gap-1 transition active:scale-95">
+                                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Guardar Dinheiro
+                            </button>
+                            <button onclick="promptWithdrawGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700 rounded-lg flex items-center gap-1 transition active:scale-95">
+                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Resgatar
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            safeCreateIcons();
+        }
+
+        async function handleSaveGoal(e) {
+            e.preventDefault();
+            const name = document.getElementById('goalName').value.trim();
+            const targetAmount = parseFloat(document.getElementById('goalTargetAmount').value) || 0;
+            const targetDate = document.getElementById('goalTargetDate').value;
+
+            if (!appData.goals) appData.goals = [];
+
+            const newGoal = {
+                id: 'goal_' + Date.now(),
+                name,
+                targetAmount,
+                currentAmount: 0,
+                targetDate,
+                createdAt: new Date().toISOString()
+            };
+
+            appData.goals.push(newGoal);
+            await pushDataToCloud();
+
+            document.getElementById('goalForm').reset();
+            renderGoalsList();
+            updateUI(true);
+            showToast('Nova meta cadastrada na nuvem! ⚡', 'success');
+        }
+
+        async function promptDepositGoal(goalId) {
+            const goal = (appData.goals || []).find(g => g.id === goalId);
+            if (!goal) return;
+
+            const valStr = prompt(`Quanto deseja guardar para a meta "${goal.name}"? (R$)`);
+            const val = parseFloat(valStr);
+            if (val && !isNaN(val) && val > 0) {
+                goal.currentAmount = (parseFloat(goal.currentAmount) || 0) + val;
+                await pushDataToCloud();
+                renderGoalsList();
+                updateUI(true);
+                showToast(`R$ ${val.toFixed(2)} adicionados à meta na nuvem! ⚡`, 'success');
+            }
+        }
+
+        async function promptWithdrawGoal(goalId) {
+            const goal = (appData.goals || []).find(g => g.id === goalId);
+            if (!goal) return;
+
+            const valStr = prompt(`Quanto deseja resgatar da meta "${goal.name}"? (R$)`);
+            const val = parseFloat(valStr);
+            if (val && !isNaN(val) && val > 0) {
+                const current = parseFloat(goal.currentAmount) || 0;
+                if (val > current) {
+                    showToast('O valor de resgate não pode ser maior que o saldo guardado.', 'red');
+                    return;
+                }
+                goal.currentAmount = current - val;
+                await pushDataToCloud();
+                renderGoalsList();
+                updateUI(true);
+                showToast(`R$ ${val.toFixed(2)} resgatados da nuvem.`, 'info');
+            }
+        }
+
+        function askDeleteGoal(goalId) {
+            const goal = (appData.goals || []).find(g => g.id === goalId);
+            if (!goal) return;
+
+            showConfirmModal('Excluir Meta', `Tem certeza que deseja excluir a meta "${goal.name}" da nuvem?`, async () => {
+                appData.goals = appData.goals.filter(g => g.id !== goalId);
+                await pushDataToCloud();
+                renderGoalsList();
+                updateUI(true);
+                showToast('Meta removida da nuvem.', 'info');
+            });
+        }
+
         function openSalaryModal() {
             const currentSalary = appData.salaries[currentMonthKey] || 0;
             document.getElementById('inputBaseSalary').value = currentSalary > 0 ? currentSalary : '';
@@ -2294,171 +2629,6 @@
             });
         }
 
-        function openGoalsModal() {
-            renderGoalsList();
-            document.getElementById('goalsModal').classList.remove('hidden');
-        }
-
-        function closeGoalsModal() {
-            document.getElementById('goalsModal').classList.add('hidden');
-        }
-
-        function renderGoalsList() {
-            const container = document.getElementById('goalsListContainer');
-            container.innerHTML = '';
-
-            const goals = appData.goals || [];
-
-            if (goals.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 flex flex-col items-center">
-                        <div class="w-24 h-24 mb-2">
-                            <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_mbe9u1ff.json" background="transparent" speed="1" loop autoplay></lottie-player>
-                        </div>
-                        <p class="text-xs text-zinc-400 font-bold">Nenhuma meta de investimento cadastrada.</p>
-                        <p class="text-[11px] text-zinc-500 mt-0.5">Cadastre objetivos como "Reserva de Emergência", "Viagem" ou "Carro Novo".</p>
-                    </div>
-                `;
-            } else {
-                const now = new Date();
-
-                goals.forEach(g => {
-                    const target = parseFloat(g.targetAmount) || 1;
-                    const current = parseFloat(g.currentAmount) || 0;
-                    const pct = Math.min(100, Math.round((current / target) * 100));
-
-                    const targetDateObj = new Date(g.targetDate + 'T00:00:00');
-                    const monthsDiff = (targetDateObj.getFullYear() - now.getFullYear()) * 12 + (targetDateObj.getMonth() - now.getMonth());
-                    const remainingMonths = Math.max(1, monthsDiff);
-                    const remainingAmount = Math.max(0, target - current);
-                    const monthlySavingsNeeded = remainingAmount / remainingMonths;
-
-                    const div = document.createElement('div');
-                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 hover:border-emerald-500/40 transition duration-300";
-                    div.innerHTML = `
-                        <div class="flex justify-between items-start gap-2">
-                            <div>
-                                <h4 class="font-bold text-sm text-zinc-100 flex items-center gap-1.5">
-                                    ${g.name}
-                                </h4>
-                                <span class="text-[11px] text-zinc-400">Prazo: <strong class="text-zinc-200">${formatDateBR(g.targetDate)}</strong> (${remainingMonths} mês/meses restantes)</span>
-                            </div>
-                            <button onclick="askDeleteGoal('${g.id}')" class="p-1 text-zinc-500 hover:text-red-400 hover:bg-zinc-900 rounded transition" title="Excluir Meta">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 bg-zinc-900/60 p-2.5 rounded-lg border border-zinc-800 text-xs">
-                            <div>
-                                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Guardado / Alvo</span>
-                                <strong class="text-emerald-400 font-extrabold">${formatBRL(current)}</strong> <span class="text-zinc-500">/ ${formatBRL(target)}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-zinc-400 text-[10px] uppercase font-bold block">Guardar por Mês</span>
-                                <strong class="text-yellow-400 font-extrabold">${formatBRL(monthlySavingsNeeded)}/mês</strong>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-[11px]">
-                                <span class="text-zinc-400">Progresso do Objetivo</span>
-                                <span class="font-bold text-emerald-400">${pct}% concluído</span>
-                            </div>
-                            <div class="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end gap-2 pt-1">
-                            <button onclick="promptDepositGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg flex items-center gap-1 transition active:scale-95">
-                                <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Guardar Dinheiro
-                            </button>
-                            <button onclick="promptWithdrawGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700 rounded-lg flex items-center gap-1 transition active:scale-95">
-                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Resgatar
-                            </button>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            }
-
-            safeCreateIcons();
-        }
-
-        async function handleSaveGoal(e) {
-            e.preventDefault();
-            const name = document.getElementById('goalName').value.trim();
-            const targetAmount = parseFloat(document.getElementById('goalTargetAmount').value) || 0;
-            const targetDate = document.getElementById('goalTargetDate').value;
-
-            if (!appData.goals) appData.goals = [];
-
-            const newGoal = {
-                id: 'goal_' + Date.now(),
-                name,
-                targetAmount,
-                currentAmount: 0,
-                targetDate,
-                createdAt: new Date().toISOString()
-            };
-
-            appData.goals.push(newGoal);
-            await pushDataToCloud();
-
-            document.getElementById('goalForm').reset();
-            renderGoalsList();
-            updateUI(true);
-            showToast('Nova meta cadastrada na nuvem! ⚡', 'success');
-        }
-
-        async function promptDepositGoal(goalId) {
-            const goal = (appData.goals || []).find(g => g.id === goalId);
-            if (!goal) return;
-
-            const valStr = prompt(`Quanto deseja guardar para a meta "${goal.name}"? (R$)`);
-            const val = parseFloat(valStr);
-            if (val && !isNaN(val) && val > 0) {
-                goal.currentAmount = (parseFloat(goal.currentAmount) || 0) + val;
-                await pushDataToCloud();
-                renderGoalsList();
-                updateUI(true);
-                showToast(`R$ ${val.toFixed(2)} adicionados à meta na nuvem! ⚡`, 'success');
-            }
-        }
-
-        async function promptWithdrawGoal(goalId) {
-            const goal = (appData.goals || []).find(g => g.id === goalId);
-            if (!goal) return;
-
-            const valStr = prompt(`Quanto deseja resgatar da meta "${goal.name}"? (R$)`);
-            const val = parseFloat(valStr);
-            if (val && !isNaN(val) && val > 0) {
-                const current = parseFloat(goal.currentAmount) || 0;
-                if (val > current) {
-                    showToast('O valor de resgate não pode ser maior que o saldo guardado.', 'red');
-                    return;
-                }
-                goal.currentAmount = current - val;
-                await pushDataToCloud();
-                renderGoalsList();
-                updateUI(true);
-                showToast(`R$ ${val.toFixed(2)} resgatados da nuvem.`, 'info');
-            }
-        }
-
-        function askDeleteGoal(goalId) {
-            const goal = (appData.goals || []).find(g => g.id === goalId);
-            if (!goal) return;
-
-            showConfirmModal('Excluir Meta', `Tem certeza que deseja excluir a meta "${goal.name}" da nuvem?`, async () => {
-                appData.goals = appData.goals.filter(g => g.id !== goalId);
-                await pushDataToCloud();
-                renderGoalsList();
-                updateUI(true);
-                showToast('Meta removida da nuvem.', 'info');
-            });
-        }
-
         function openDebtsModal() {
             const container = document.getElementById('debtsListContainer');
             container.innerHTML = '';
@@ -2503,7 +2673,7 @@
             if (groupKeys.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10">
-                        <i data-lucide="check-circle" class="w-10 h-10 text-emerald-400 mx-auto mb-2 animate-bounce"></i>
+                        <i data-lucide="check-circle" class="w-10 h-10 text-emerald-400 mx-auto mb-2"></i>
                         <p class="text-xs text-zinc-400 font-bold">Nenhum parcelamento ativo cadastrado.</p>
                         <p class="text-[11px] text-zinc-500 mt-0.5">Ao cadastrar um lançamento, marque "Compra Parcelada / Dívida".</p>
                     </div>
