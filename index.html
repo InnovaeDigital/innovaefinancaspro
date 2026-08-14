@@ -1152,6 +1152,12 @@
         const CLOUD_ACCESS_KEY = '$2a$10$ApTt.eV3Ym2.TNpkQPw92uvPtPJxrUCr1XEpHkgpuTLgLJMbbH9Te';
         const SHARED_MASTER_BIN_ID = '6a7f5e6dda38895dfee5b080';
         const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
+        // Cloud transport: direct JSONBin is used on HTTPS/HTTP pages.
+        // When this file is opened as file://, the browser has no normal web origin;
+        // use the included local server (server.js) or deploy the site over HTTPS.
+        const CLOUD_PROXY_URL = window.INNOVAE_CLOUD_PROXY_URL || '';
+        const IS_FILE_ORIGIN = location.protocol === 'file:';
+
 
         // Pre-seeded Owner Account (HARDCODED SAFEGUARD)
         const OWNER_USER = {
@@ -1249,8 +1255,18 @@
             }
         }
 
+        function showTransportHint() {
+            const hint = document.getElementById('loginCloudStatus');
+            const text = document.getElementById('loginCloudText');
+            if (IS_FILE_ORIGIN && !CLOUD_PROXY_URL && hint && text) {
+                hint.className = 'mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-950 border border-amber-500/40 text-[11px] font-bold text-amber-300';
+                text.textContent = 'Abra por HTTP/HTTPS para ativar a nuvem';
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             initPWA();
+            showTransportHint();
             await syncFromCloudRealtime(false);
             populateLoginUserSelect();
             
@@ -1373,12 +1389,21 @@
         }
 
         async function requestWithAuth(path, options, headerName, key) {
-            const url = `${JSONBIN_ENDPOINT}/${path}`;
             const method = String(options.method || 'GET').toUpperCase();
+            const proxyBase = CLOUD_PROXY_URL.replace(/\/$/, '');
+            const directUrl = `${JSONBIN_ENDPOINT}/${path}`;
+            const url = proxyBase
+                ? `${proxyBase}?path=${encodeURIComponent(path)}`
+                : directUrl;
             const baseHeaders = new Headers(options.headers || {});
             baseHeaders.delete('X-Master-Key');
             baseHeaders.delete('X-Access-Key');
-            baseHeaders.set(headerName, key);
+            if (!proxyBase) baseHeaders.set(headerName, key);
+            baseHeaders.set('Accept', 'application/json');
+
+            if (IS_FILE_ORIGIN && !proxyBase) {
+                throw new Error('Este arquivo foi aberto como file://. Para sincronizar com a nuvem, abra o site por HTTP/HTTPS (use o server.js incluído ou publique em HTTPS).');
+            }
 
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 12000);
@@ -1393,8 +1418,6 @@
                         signal: controller.signal
                     });
                 } catch (fetchError) {
-                    // JSONBin documents XMLHttpRequest as a browser-supported example.
-                    // Retry with XHR when fetch is blocked by the browser/network stack.
                     return await new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
                         xhr.open(method, url, true);
@@ -1402,20 +1425,18 @@
                         baseHeaders.forEach((value, name) => xhr.setRequestHeader(name, value));
                         xhr.onreadystatechange = () => {
                             if (xhr.readyState !== XMLHttpRequest.DONE) return;
-                            const headers = new Headers();
                             const text = xhr.responseText || '';
                             let body = text;
                             try { body = text ? JSON.parse(text) : null; } catch (_) {}
                             resolve(new Response(JSON.stringify(body ?? {}), {
                                 status: xhr.status || 0,
                                 statusText: xhr.statusText || '',
-                                headers
+                                headers: new Headers({'Content-Type':'application/json'})
                             }));
                         };
-                        xhr.ontimeout = () => reject(new Error('Tempo limite de 12s'));
+                        xhr.ontimeout = () => reject(new Error('Tempo limite de 12s ao acessar a nuvem.'));
                         xhr.onerror = () => reject(new Error('Falha de rede/CORS ao acessar a API do JSONBin.'));
-                        const body = options.body ?? null;
-                        xhr.send(body);
+                        xhr.send(options.body ?? null);
                     });
                 }
             } finally {
@@ -1534,6 +1555,9 @@
                 window.cloudAvailable = false;
                 updateCloudUIState('error');
                 console.error('Falha de sincronização na nuvem:', error);
+                if (IS_FILE_ORIGIN && !CLOUD_PROXY_URL) {
+                    cloudLastError = 'O HTML foi aberto como file://. Sirva o site por HTTP/HTTPS usando o server.js incluído ou publique-o em HTTPS.';
+                }
                 const loginCloudText = document.getElementById('loginCloudText');
                 const retryButton = document.getElementById('retryCloudButton');
                 if (loginCloudText) loginCloudText.textContent = 'Nuvem indisponível';

@@ -1,0 +1,9 @@
+INNOVAE FINANÇAS PRO — TESTE LOCAL
+
+1. Instale o Node.js 18+.
+2. Coloque server.js e index_innovae_financas_pro_cloud_v7.html na mesma pasta.
+3. Abra o terminal nessa pasta.
+4. Execute: node server.js
+5. Abra: http://127.0.0.1:8080
+
+IMPORTANTE: não abra o HTML dando duplo clique (file://). O JSONBin aceita CORS, mas uma página aberta como file:// não possui uma origem web normal para esse fluxo. Em produção, publique o site em HTTPS.
