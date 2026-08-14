@@ -253,6 +253,7 @@
                 <div id="loginCloudStatus" class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] font-bold text-zinc-400">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                     <span id="loginCloudText">Nuvem em Tempo Real Ativa</span>
+                    <button type="button" onclick="retryCloudConnection()" class="ml-1 text-[10px] text-yellow-400 hover:text-yellow-300 underline">Tentar novamente</button>
                 </div>
             </div>
 
@@ -1142,6 +1143,8 @@
 
     <script>
         // CLOUD DATABASE API ENGINE (JSONbin.io High-Speed Stream)
+        // Chaves fornecidas pelo proprietário do sistema.
+        // Atenção: chaves de API expostas no frontend podem ser copiadas por terceiros.
         const CLOUD_MASTER_KEY = '$2a$10$xjbmNJ34NWSjCcDmWwY8BO34DUS0DTze4hsHew9.AjxW0jcjIqcFe';
         const CLOUD_ACCESS_KEY = '$2a$10$aQizQ/cW0Nm5g6oVYEeRo./tFqUbbzj8TrDPdViFiKxeDBszlkj9S';
         const SHARED_MASTER_BIN_ID = '67ad840be4101579cf43f389';
@@ -1339,21 +1342,60 @@
             }, 28);
         }
 
+        async function cloudFetch(path, options = {}) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 12000);
+
+            async function doRequest(authHeader) {
+                const headers = new Headers(options.headers || {});
+                headers.delete('X-Master-Key');
+                headers.delete('X-Access-Key');
+                headers.set(authHeader.name, authHeader.value);
+                return fetch(`${JSONBIN_ENDPOINT}/${path}`, {
+                    ...options,
+                    headers,
+                    cache: 'no-store',
+                    credentials: 'omit',
+                    signal: controller.signal
+                });
+            }
+
+            try {
+                // First attempt with the Access Key. If the key does not have
+                // permission for the requested operation, retry with the Master Key.
+                let response = await doRequest({ name: 'X-Access-Key', value: CLOUD_ACCESS_KEY });
+
+                if (response.status === 401 || response.status === 403) {
+                    response = await doRequest({ name: 'X-Master-Key', value: CLOUD_MASTER_KEY });
+                }
+
+                if (!response.ok) {
+                    let detail = '';
+                    try {
+                        const body = await response.clone().json();
+                        detail = body?.message ? ` — ${body.message}` : '';
+                    } catch (_) {}
+                    throw new Error(`Cloud HTTP ${response.status}${detail}`);
+                }
+
+                return response;
+            } catch (error) {
+                if (error?.name === 'AbortError') {
+                    throw new Error('Tempo limite ao conectar à nuvem (12s).');
+                }
+                throw error;
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
         async function syncFromCloudRealtime(isSilent = true) {
             if (!isSilent) updateCloudUIState('syncing');
 
             try {
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Master-Key': CLOUD_MASTER_KEY,
-                        'X-Access-Key': CLOUD_ACCESS_KEY
-                    },
-                    cache: 'no-store',
-                    credentials: 'omit'
+                const res = await cloudFetch(`${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`, {
+                    method: 'GET'
                 });
-
-                if (!res.ok) throw new Error(`Cloud GET ${res.status}`);
 
                 const data = await res.json();
                 const record = data.record || data;
@@ -1435,20 +1477,14 @@
                     updatedAt: new Date().toISOString()
                 };
 
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}`, {
+                const res = await cloudFetch(`${SHARED_MASTER_BIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Master-Key': CLOUD_MASTER_KEY,
-                        'X-Access-Key': CLOUD_ACCESS_KEY,
                         'X-Bin-Versioning': 'true'
                     },
-                    cache: 'no-store',
-                    credentials: 'omit',
                     body: JSON.stringify(payload)
                 });
-
-                if (!res.ok) throw new Error(`Cloud PUT ${res.status}`);
 
                 allCloudUserDataMap = cloudDataBeforeWrite;
                 appData = normalizeAppData(allCloudUserDataMap[currentUser.id]);
@@ -1462,7 +1498,7 @@
                 window.cloudAvailable = false;
                 updateCloudUIState('error');
                 console.error('Falha ao gravar na nuvem:', error);
-                showToast('Não foi possível salvar agora. Seus dados permanecem apenas em memória até a nuvem voltar.', 'red');
+                showToast('Não foi possível salvar na nuvem. Nenhum dado foi gravado localmente.', 'red');
                 return false;
             }
         }
@@ -1491,6 +1527,12 @@
             }
         }
 
+        async function retryCloudConnection() {
+            updateCloudUIState('syncing');
+            const ok = await syncFromCloudRealtime(false);
+            if (!ok) showToast('A conexão com a nuvem ainda não respondeu. Verifique a chave de acesso do JSONBin e a internet.', 'red');
+        }
+
         async function handleLogin(e) {
             e.preventDefault();
             const selectedUserId = document.getElementById('loginUserSelect').value;
@@ -1502,7 +1544,7 @@
             if (!window.cloudAvailable) {
                 await syncFromCloudRealtime(false);
                 if (!window.cloudAvailable) {
-                    errorEl.textContent = 'A nuvem está indisponível. Conecte-se à internet e tente novamente.';
+                    errorEl.textContent = 'Não foi possível conectar ao banco em nuvem. Verifique a conexão e tente novamente.';
                     errorEl.classList.remove('hidden');
                     return;
                 }
