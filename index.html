@@ -1119,6 +1119,8 @@
         let registeredUsers = [OWNER_USER];
         let currentUser = null;
         let allCloudUserDataMap = {};
+        let consecutiveCloudErrors = 0;
+        let lastSyncedDataHash = "";
 
         // Active Selected User Data
         let appData = {
@@ -1146,6 +1148,172 @@
         function safeCreateIcons() {
             if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
                 lucide.createIcons();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            initPWA();
+            await syncFromCloudRealtime(false);
+            populateLoginUserSelect();
+            startRealTimeCloudPolling();
+            safeCreateIcons();
+
+            // Instant sync whenever user switches back to the app tab/screen
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    syncFromCloudRealtime(true);
+                }
+            });
+            window.addEventListener('focus', () => {
+                syncFromCloudRealtime(true);
+            });
+        });
+
+        // PURE CLOUD ENGINE - OPTIMIZED SILENT REALTIME READ & WRITE WITH CACHE-BUSTING
+        async function syncFromCloudRealtime(isSilent = true) {
+            if (!isSilent) {
+                updateCloudUIState('syncing');
+            }
+
+            try {
+                const cacheBuster = Date.now();
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest?cb=${cacheBuster}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': CLOUD_MASTER_KEY,
+                        'X-Access-Key': CLOUD_ACCESS_KEY
+                    },
+                    cache: 'no-store'
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const record = data.record || data;
+                    if (record) {
+                        consecutiveCloudErrors = 0;
+
+                        if (record.users && Array.isArray(record.users)) {
+                            const map = new Map();
+                            map.set(OWNER_USER.id, OWNER_USER);
+                            record.users.forEach(u => map.set(u.id, u));
+                            registeredUsers = Array.from(map.values());
+                            populateLoginUserSelect();
+                        }
+
+                        if (record.allUserData) {
+                            allCloudUserDataMap = record.allUserData;
+                            if (currentUser && allCloudUserDataMap[currentUser.id]) {
+                                const newUserData = allCloudUserDataMap[currentUser.id];
+                                const newDataHash = JSON.stringify(newUserData);
+
+                                if (newDataHash !== lastSyncedDataHash) {
+                                    lastSyncedDataHash = newDataHash;
+                                    appData = newUserData;
+                                    if (!appData.goals) appData.goals = [];
+                                    if (!appData.budgets) appData.budgets = {};
+                                    updateUI();
+                                }
+                            }
+                        }
+                    }
+                    updateCloudUIState('synced');
+                } else {
+                    consecutiveCloudErrors++;
+                    if (consecutiveCloudErrors > 3) {
+                        updateCloudUIState('local');
+                    }
+                }
+            } catch(e) {
+                consecutiveCloudErrors++;
+                if (consecutiveCloudErrors > 3) {
+                    updateCloudUIState('local');
+                }
+            }
+        }
+
+        async function pushDataToCloud() {
+            updateCloudUIState('syncing');
+            try {
+                if (currentUser) {
+                    allCloudUserDataMap[currentUser.id] = appData;
+                    lastSyncedDataHash = JSON.stringify(appData);
+                }
+
+                const payload = {
+                    users: registeredUsers,
+                    allUserData: allCloudUserDataMap,
+                    updatedAt: new Date().toISOString()
+                };
+
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': CLOUD_MASTER_KEY,
+                        'X-Access-Key': CLOUD_ACCESS_KEY
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    consecutiveCloudErrors = 0;
+                    updateCloudUIState('synced');
+                } else {
+                    consecutiveCloudErrors++;
+                    if (consecutiveCloudErrors > 3) {
+                        updateCloudUIState('local');
+                    }
+                }
+            } catch(e) {
+                consecutiveCloudErrors++;
+                if (consecutiveCloudErrors > 3) {
+                    updateCloudUIState('local');
+                }
+            }
+        }
+
+        function startRealTimeCloudPolling() {
+            if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
+            // Poll silently every 4 seconds when active, 12 seconds when inactive
+            realTimeCloudTimer = setInterval(async () => {
+                const intervalTime = document.visibilityState === 'visible' ? 4000 : 12000;
+                await syncFromCloudRealtime(true);
+            }, 4000);
+        }
+
+        function updateCloudUIState(state) {
+            const badge = document.getElementById('cloudSyncBadge');
+            const text = document.getElementById('cloudStatusText');
+            if (!badge || !text) return;
+
+            if (state === 'syncing') {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
+                text.textContent = "Sincronizando Nuvem ⚡";
+            } else if (state === 'synced') {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
+                text.textContent = "Nuvem em Tempo Real ⚡";
+            } else {
+                badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-zinc-400";
+                text.textContent = "Reconectando Nuvem...";
+            }
+        }
+
+        function populateLoginUserSelect() {
+            const select = document.getElementById('loginUserSelect');
+            if (!select) return;
+            
+            const currentSelectedVal = select.value;
+            select.innerHTML = '';
+
+            registeredUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : (u.role === 'admin' ? ' (admin)' : ''));
+                select.appendChild(opt);
+            });
+
+            if (currentSelectedVal && Array.from(select.options).some(o => o.value === currentSelectedVal)) {
+                select.value = currentSelectedVal;
             }
         }
 
