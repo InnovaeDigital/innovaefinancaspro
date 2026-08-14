@@ -58,6 +58,7 @@
             background-color: #09090b;
             padding-bottom: env(safe-area-inset-bottom);
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
         /* Custom scrollbars */
         ::-webkit-scrollbar {
@@ -74,7 +75,8 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #facc15;
         }
-        /* Mobile Touch Optimizations */
+        
+        /* Mobile Touch & Modal Sheet Optimizations */
         @media (max-width: 640px) {
             .mobile-bottom-padding {
                 padding-bottom: 5.5rem;
@@ -84,9 +86,16 @@
                 border-bottom-right-radius: 0 !important;
                 border-top-left-radius: 1.75rem !important;
                 border-top-right-radius: 1.75rem !important;
+                animation: slideUpMobile 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             }
         }
-        /* Cloud Pulse Sync Animation */
+
+        /* Keyframes Animations */
+        @keyframes slideUpMobile {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
         @keyframes cloudPulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.6; transform: scale(0.95); }
@@ -94,20 +103,108 @@
         .cloud-syncing {
             animation: cloudPulse 1.2s infinite ease-in-out;
         }
+
+        /* Floating Money / Particles Animation */
+        @keyframes floatMoney {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+            50% { transform: translateY(-25px) rotate(12deg); opacity: 0.8; }
+            100% { transform: translateY(-50px) rotate(-6deg); opacity: 0; }
+        }
+        .animate-float-money {
+            animation: floatMoney 4s infinite ease-in-out;
+        }
+
+        /* Gold Glow Aura Animation */
+        @keyframes goldAura {
+            0%, 100% { box-shadow: 0 0 25px rgba(250, 204, 21, 0.25); }
+            50% { box-shadow: 0 0 50px rgba(250, 204, 21, 0.6); }
+        }
+        .gold-glow-aura {
+            animation: goldAura 3s infinite ease-in-out;
+        }
+
+        /* Modal Entrance Animation */
+        @keyframes modalEnter {
+            from { opacity: 0; transform: scale(0.92) translateY(15px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-enter {
+            animation: modalEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Rising Income Icon Effect */
+        @keyframes riseUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-rise {
+            animation: riseUp 2s infinite ease-in-out;
+        }
+
+        /* Welcome Splash Reveal Animation */
+        @keyframes splashZoom {
+            0% { opacity: 0; transform: scale(0.85); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-splash {
+            animation: splashZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen transition-colors duration-200 mobile-bottom-padding antialiased selection:bg-yellow-400 selection:text-zinc-950">
 
+    <!-- WELCOME ANIMATION OVERLAY -->
+    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/95 backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
+        <!-- Floating Finance Background Particles -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <span class="absolute text-yellow-400/20 text-3xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
+            <span class="absolute text-emerald-400/20 text-4xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1s;">+ %</span>
+            <span class="absolute text-amber-400/20 text-3xl font-black left-1/4 bottom-1/4 animate-float-money" style="animation-delay: 2s;">💰</span>
+            <span class="absolute text-yellow-400/20 text-5xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 1.5s;">R$</span>
+        </div>
+
+        <div class="text-center p-6 max-w-md mx-auto relative z-10 animate-splash">
+            <div class="inline-block relative mb-4">
+                <div class="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-300 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                <img src="LOGO.png" alt="Innovae Pro Logo" class="relative h-24 sm:h-28 mx-auto object-contain drop-shadow-[0_10px_25px_rgba(250,204,21,0.5)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+            </div>
+
+            <div class="space-y-2 mt-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-xs font-extrabold text-yellow-400">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autenticação Concluída
+                </span>
+                <h2 id="welcomeUserGreeting" class="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                    Bem-vindo(a) ao Innovae Pro!
+                </h2>
+                <p class="text-xs text-zinc-400">Sincronizando seus dados financeiros na nuvem...</p>
+            </div>
+
+            <!-- Animated Progress Bar -->
+            <div class="w-full bg-zinc-900 border border-zinc-800 rounded-full h-2 mt-6 overflow-hidden">
+                <div id="welcomeProgressBar" class="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black">
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black relative overflow-hidden">
+        
+        <!-- Ambient Finance Icons Background -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+            <i data-lucide="trending-up" class="w-24 h-24 text-yellow-400 absolute -top-5 -left-5 animate-pulse"></i>
+            <i data-lucide="wallet" class="w-32 h-32 text-amber-500 absolute bottom-10 right-5 opacity-50"></i>
+            <i data-lucide="pie-chart" class="w-20 h-20 text-emerald-400 absolute top-1/3 right-10"></i>
+        </div>
+
         <div class="w-full max-w-md bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(250,204,21,0.08)] backdrop-blur-xl relative overflow-hidden">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
             
             <div class="text-center mb-6">
                 <!-- LOGO DISPLAY -->
-                <div class="inline-block relative mb-3 group">
+                <div class="inline-block relative mb-3 group cursor-pointer">
                     <div class="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
-                    <img src="LOGO.png" alt="Innovae Finanças Pro" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.8)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+                    <img src="LOGO.png" alt="Innovae Finanças Pro" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.8)] transition transform group-hover:scale-105 duration-300" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
                 </div>
                 <h1 class="text-2xl font-black tracking-tight bg-gradient-to-r from-zinc-100 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
                     Innovae Finanças Pro
@@ -143,9 +240,9 @@
                     Senha incorreta. Tente novamente.
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-zinc-950 font-black py-3 rounded-xl transition duration-200 shadow-lg shadow-yellow-500/10 active:scale-95 flex items-center justify-center gap-2">
+                <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-zinc-950 font-black py-3 rounded-xl transition duration-200 shadow-lg shadow-yellow-500/20 active:scale-95 flex items-center justify-center gap-2 group">
                     <span>Acessar o Painel</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition duration-200"></i>
                 </button>
             </form>
         </div>
@@ -157,7 +254,7 @@
         <!-- Header Bar -->
         <header class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80 mb-6">
             <div class="flex items-center gap-3">
-                <img src="LOGO.png" alt="Innovae Pro Logo" class="h-10 sm:h-12 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/120x50/121215/facc15?text=INNOVAE';">
+                <img src="LOGO.png" alt="Innovae Pro Logo" class="h-10 sm:h-12 object-contain hover:scale-105 transition duration-200" onerror="this.onerror=null; this.src='https://placehold.co/120x50/121215/facc15?text=INNOVAE';">
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black text-zinc-100 tracking-tight flex items-center gap-2">
                         Innovae Finanças <span class="text-yellow-400">Pro</span>
@@ -176,7 +273,7 @@
                 </div>
 
                 <!-- Active User Badge -->
-                <div class="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner">
+                <div class="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner hover:border-zinc-700 transition">
                     <div class="w-7 h-7 rounded-lg bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 flex items-center justify-center font-bold text-xs" id="userAvatar">
                         D
                     </div>
@@ -255,14 +352,14 @@
         <!-- Financial Metrics Cards (Responsive Grid) -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
             <!-- Salário / Receitas (Green) -->
-            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-emerald-500/60 transition">
+            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-emerald-500/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-400">Renda Mensal</span>
-                    <span class="p-1.5 sm:p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                    <span class="p-1.5 sm:p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 animate-rise">
                         <i data-lucide="arrow-down-left" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
-                <div class="text-base sm:text-2xl font-black text-emerald-400 tracking-tight" id="cardIncome">R$ 0,00</div>
+                <div class="text-base sm:text-2xl font-black text-emerald-400 tracking-tight transition-all" id="cardIncome">R$ 0,00</div>
                 <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center text-[10px] sm:text-[11px] text-zinc-400 gap-0.5 sm:gap-1">
                     <span>Base: <strong id="cardSalaryBase" class="text-zinc-200">R$ 0,00</strong></span>
                     <span class="hidden sm:inline">•</span>
@@ -271,14 +368,14 @@
             </div>
 
             <!-- Gastos Totais (Red) -->
-            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-500/60 transition">
+            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-500/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-red-400">Despesas Totais</span>
                     <span class="p-1.5 sm:p-2 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20">
                         <i data-lucide="arrow-up-right" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
-                <div class="text-base sm:text-2xl font-black text-red-400 tracking-tight" id="cardExpenses">R$ 0,00</div>
+                <div class="text-base sm:text-2xl font-black text-red-400 tracking-tight transition-all" id="cardExpenses">R$ 0,00</div>
                 <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center text-[10px] sm:text-[11px] text-zinc-400 gap-0.5 sm:gap-1">
                     <span id="pagoCount" class="text-emerald-400 font-medium">0 Pagas</span>
                     <span class="hidden sm:inline">•</span>
@@ -287,28 +384,28 @@
             </div>
 
             <!-- Sobra ou Falta (Dynamic Green/Red) -->
-            <div id="balanceCardContainer" class="col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition">
+            <div id="balanceCardContainer" class="col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400" id="balanceCardLabel">Saldo Restante</span>
                     <span id="balanceIconContainer" class="p-1.5 sm:p-2 bg-yellow-400/10 text-yellow-400 rounded-xl border border-yellow-400/20">
                         <i data-lucide="piggy-bank" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
-                <div class="text-base sm:text-2xl font-black tracking-tight" id="cardBalance">R$ 0,00</div>
+                <div class="text-base sm:text-2xl font-black tracking-tight transition-all" id="cardBalance">R$ 0,00</div>
                 <div class="mt-2 text-[10px] sm:text-[11px] text-zinc-400" id="balanceStatusText">
                     Calculando saúde do orçamento...
                 </div>
             </div>
 
             <!-- Parcelas / Dívidas (Red / Yellow Accent) -->
-            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/40 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-400 transition cursor-pointer" onclick="openDebtsModal()">
+            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/40 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-400 transition duration-300 cursor-pointer" onclick="openDebtsModal()">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-red-400">Dívidas & Parcelas</span>
                     <span class="p-1.5 sm:p-2 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20">
                         <i data-lucide="credit-card" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
-                <div class="text-base sm:text-2xl font-black text-red-400 tracking-tight" id="cardMonthlyDebts">R$ 0,00</div>
+                <div class="text-base sm:text-2xl font-black text-red-400 tracking-tight transition-all" id="cardMonthlyDebts">R$ 0,00</div>
                 <div class="mt-2 flex items-center justify-between text-[10px] sm:text-[11px] text-zinc-400">
                     <span id="cardActiveDebtsCount" class="text-zinc-300">0 Ativas</span>
                     <span class="text-yellow-400 font-semibold hover:underline">Ver &rarr;</span>
@@ -316,23 +413,23 @@
             </div>
 
             <!-- Porcentagem do Salário Comprometida (Yellow) -->
-            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-yellow-400/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-yellow-400/60 transition">
+            <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-yellow-400/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-yellow-400/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-yellow-400">% Renda Usada</span>
                     <span class="p-1.5 sm:p-2 bg-yellow-400/10 text-yellow-400 rounded-xl border border-yellow-400/20">
                         <i data-lucide="pie-chart" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
-                <div class="text-base sm:text-2xl font-black text-yellow-400 tracking-tight" id="cardUsagePercent">0%</div>
+                <div class="text-base sm:text-2xl font-black text-yellow-400 tracking-tight transition-all" id="cardUsagePercent">0%</div>
                 <!-- Mini Progress Bar -->
                 <div class="w-full bg-zinc-950 rounded-full h-2 mt-3 overflow-hidden border border-zinc-800">
-                    <div id="usageProgressBar" class="bg-yellow-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    <div id="usageProgressBar" class="bg-yellow-400 h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
         <!-- Financial Health Status Banner -->
-        <div id="healthBanner" class="mb-8 p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-900/60 border-zinc-800 shadow-xl">
+        <div id="healthBanner" class="mb-8 p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-900/60 border-zinc-800 shadow-xl transition-all duration-300">
             <div class="flex items-center gap-3">
                 <div id="healthBannerIcon" class="p-2.5 rounded-xl bg-zinc-800 text-yellow-400 border border-zinc-700 shrink-0">
                     <i data-lucide="info" class="w-6 h-6"></i>
@@ -349,9 +446,9 @@
         </div>
 
         <!-- Planning & Goals Overview Banner -->
-        <div class="mb-8 p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div class="mb-8 p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 relative overflow-hidden group hover:border-emerald-500/50 transition">
             <div class="flex items-center gap-3.5">
-                <div class="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                <div class="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0 animate-pulse">
                     <i data-lucide="vault" class="w-7 h-7"></i>
                 </div>
                 <div>
@@ -367,7 +464,7 @@
                     <span class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Total Acumulado em Metas</span>
                     <div class="text-lg font-black text-emerald-400" id="cardTotalGoalsSaved">R$ 0,00</div>
                 </div>
-                <button onclick="openGoalsModal()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-lg shrink-0 flex items-center gap-2">
+                <button onclick="openGoalsModal()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-lg shrink-0 flex items-center gap-2 active:scale-95">
                     <i data-lucide="plus" class="w-4 h-4"></i> Gerenciar Metas
                 </button>
             </div>
@@ -410,7 +507,7 @@
                             <span id="necUsageText" class="text-zinc-400">R$ 0 / R$ 0 (0%)</span>
                         </div>
                         <div class="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                            <div id="necProgressBar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            <div id="necProgressBar" class="bg-yellow-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
 
@@ -421,7 +518,7 @@
                             <span id="desUsageText" class="text-zinc-400">R$ 0 / R$ 0 (0%)</span>
                         </div>
                         <div class="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                            <div id="desProgressBar" class="bg-amber-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            <div id="desProgressBar" class="bg-amber-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
 
@@ -432,7 +529,7 @@
                             <span id="invUsageText" class="text-zinc-400">R$ 0 / R$ 0 (0%)</span>
                         </div>
                         <div class="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                            <div id="invProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            <div id="invProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
@@ -564,7 +661,7 @@
 
     <!-- MODAL 1: Admin Usuários (Proprietário) -->
     <div id="usersAdminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-amber-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-amber-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeUsersAdminModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -637,7 +734,7 @@
 
     <!-- MODAL 2: Salário / Configuração de Renda -->
     <div id="salaryModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet animate-modal-enter">
             <button onclick="closeSalaryModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -673,7 +770,7 @@
 
     <!-- MODAL 3: Nova / Editar Transação -->
     <div id="transactionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto mobile-modal-sheet animate-modal-enter">
             <button onclick="closeTransactionModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -799,7 +896,7 @@
 
     <!-- MODAL 4: Gerenciador de Dívidas e Parcelamentos -->
     <div id="debtsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeDebtsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -837,7 +934,7 @@
 
     <!-- MODAL 5: Planejamento & Metas Financeiras (Cofrinho) -->
     <div id="goalsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-emerald-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-emerald-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeGoalsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -889,7 +986,7 @@
 
     <!-- MODAL 6: Gerenciador de Metas por Categoria (Tetos) -->
     <div id="budgetsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet animate-modal-enter">
             <button onclick="closeBudgetsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -919,7 +1016,7 @@
 
     <!-- MODAL 7: Confirmação Personalizada sem alert() -->
     <div id="confirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative text-center">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div class="p-3 bg-red-500/10 text-red-400 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center border border-red-500/30">
                 <i data-lucide="alert-triangle" class="w-6 h-6"></i>
             </div>
@@ -969,8 +1066,10 @@
         // CLOUD DATABASE API CONFIGURATION (JSONbin.io Engine)
         const CLOUD_MASTER_KEY = '$2a$10$xjbmNJ34NWSjCcDmWwY8BO34DUS0DTze4hsHew9.AjxW0jcjIqcFe';
         const CLOUD_ACCESS_KEY = '$2a$10$aQizQ/cW0Nm5g6oVYEeRo./tFqUbbzj8TrDPdViFiKxeDBszlkj9S';
-        const CLOUD_BIN_ID_STORAGE_KEY = 'innovae_cloud_bin_id_v1';
+        const CLOUD_BIN_ID_STORAGE_KEY = 'innovae_cloud_bin_id_v2';
         const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
+        // Shared Fixed Master Bin ID for unified cross-device sync
+        const SHARED_MASTER_BIN_ID = '67ad840be4101579cf43f389';
 
         // System Auth & Users State
         const SYSTEM_USERS_KEY = 'innovae_users_list_v2';
@@ -1033,8 +1132,8 @@
         window.addEventListener('DOMContentLoaded', async () => {
             initPWA();
             initUsersStorage();
-            await syncCloudDatabaseOnStartup();
             populateLoginUserSelect();
+            await syncCloudDatabaseOnStartup();
             checkCurrentSession();
             safeCreateIcons();
         });
@@ -1043,6 +1142,8 @@
         function populateLoginUserSelect() {
             const select = document.getElementById('loginUserSelect');
             if (!select) return;
+            
+            const selectedVal = select.value;
             select.innerHTML = '';
 
             registeredUsers.forEach(u => {
@@ -1051,62 +1152,80 @@
                 opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : '');
                 select.appendChild(opt);
             });
+
+            if (selectedVal && Array.from(select.options).some(o => o.value === selectedVal)) {
+                select.value = selectedVal;
+            }
         }
 
-        // CLOUD DATABASE SYNC ENGINE (API KEY INTEGRATION)
+        // CLOUD DATABASE SYNC ENGINE (UNIFIED MULTI-DEVICE CLOUD BIN)
         async function syncCloudDatabaseOnStartup() {
             updateCloudUIState('syncing');
             try {
-                let binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY);
+                let binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY) || SHARED_MASTER_BIN_ID;
                 
-                if (!binId) {
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${binId}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': CLOUD_MASTER_KEY,
+                        'X-Access-Key': CLOUD_ACCESS_KEY
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const record = data.record;
+                    if (record) {
+                        // Merge users array
+                        if (record.users && Array.isArray(record.users)) {
+                            const mergedUsersMap = new Map();
+                            // Keep default owner
+                            mergedUsersMap.set(OWNER_USER.id, OWNER_USER);
+                            
+                            // Add local users
+                            registeredUsers.forEach(u => mergedUsersMap.set(u.id, u));
+                            // Add cloud users
+                            record.users.forEach(u => mergedUsersMap.set(u.id, u));
+
+                            registeredUsers = Array.from(mergedUsersMap.values());
+                            saveUsersToLocalStorageOnly();
+                            populateLoginUserSelect();
+                        }
+
+                        // Load current user data if logged in
+                        if (currentUser && record.allUserData && record.allUserData[currentUser.id]) {
+                            appData = record.allUserData[currentUser.id];
+                            if (!appData.goals) appData.goals = [];
+                            localStorage.setItem(getUserStorageKey(), JSON.stringify(appData));
+                        }
+                    }
+                    localStorage.setItem(CLOUD_BIN_ID_STORAGE_KEY, binId);
+                    updateCloudUIState('synced');
+                } else if (res.status === 404) {
+                    // Create primary master bin if first run
                     const masterState = {
                         users: registeredUsers,
                         allUserData: {}
                     };
-                    const res = await fetch(JSONBIN_ENDPOINT, {
+                    const createRes = await fetch(JSONBIN_ENDPOINT, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-Master-Key': CLOUD_MASTER_KEY,
                             'X-Access-Key': CLOUD_ACCESS_KEY,
-                            'X-Bin-Name': 'innovae_financas_pro_db'
+                            'X-Bin-Name': 'innovae_financas_pro_db_shared'
                         },
                         body: JSON.stringify(masterState)
                     });
-                    if (res.ok) {
-                        const data = await res.json();
-                        binId = data.metadata.id;
-                        localStorage.setItem(CLOUD_BIN_ID_STORAGE_KEY, binId);
+                    if (createRes.ok) {
+                        const createData = await createRes.json();
+                        localStorage.setItem(CLOUD_BIN_ID_STORAGE_KEY, createData.metadata.id);
                         updateCloudUIState('synced');
                     } else {
                         updateCloudUIState('local');
                     }
                 } else {
-                    const res = await fetch(`${JSONBIN_ENDPOINT}/${binId}/latest`, {
-                        method: 'GET',
-                        headers: {
-                            'X-Master-Key': CLOUD_MASTER_KEY,
-                            'X-Access-Key': CLOUD_ACCESS_KEY
-                        }
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        const record = data.record;
-                        if (record && record.users) {
-                            registeredUsers = record.users;
-                            saveUsersToLocalStorageOnly();
-                            
-                            if (currentUser && record.allUserData && record.allUserData[currentUser.id]) {
-                                appData = record.allUserData[currentUser.id];
-                                if (!appData.goals) appData.goals = [];
-                                localStorage.setItem(getUserStorageKey(), JSON.stringify(appData));
-                            }
-                        }
-                        updateCloudUIState('synced');
-                    } else {
-                        updateCloudUIState('synced');
-                    }
+                    updateCloudUIState('local');
                 }
             } catch(e) {
                 console.warn('Cloud API Sync using local fallback:', e);
@@ -1115,7 +1234,7 @@
         }
 
         async function pushDataToCloud() {
-            const binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY);
+            let binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY) || SHARED_MASTER_BIN_ID;
             if (!binId) return;
 
             updateCloudUIState('syncing');
@@ -1127,6 +1246,10 @@
                         try { allUserData[u.id] = JSON.parse(stored); } catch(e){}
                     }
                 });
+
+                if (currentUser) {
+                    allUserData[currentUser.id] = appData;
+                }
 
                 const payload = {
                     users: registeredUsers,
@@ -1161,7 +1284,7 @@
 
             if (state === 'syncing') {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
-                text.textContent = "Sincronizando...";
+                text.textContent = "Sincronizando Nuvem...";
             } else if (state === 'synced') {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
                 text.textContent = "Nuvem Conectada ☁️";
@@ -1226,10 +1349,10 @@
             localStorage.setItem(SYSTEM_USERS_KEY, JSON.stringify(registeredUsers));
         }
 
-        function saveUsersToStorage() {
+        async function saveUsersToStorage() {
             saveUsersToLocalStorageOnly();
             populateLoginUserSelect();
-            pushDataToCloud();
+            await pushDataToCloud();
         }
 
         function getUserStorageKey() {
@@ -1292,7 +1415,7 @@
                     const exists = registeredUsers.find(u => u.id === sessionUser.id);
                     if (exists) {
                         currentUser = exists;
-                        startUserSession();
+                        startUserSession(false);
                         return;
                     }
                 } catch(e) {}
@@ -1319,11 +1442,45 @@
                 errorEl.classList.add('hidden');
                 currentUser = user;
                 localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(currentUser));
-                startUserSession();
-                showToast(`Bem-vindo, ${currentUser.name}!`, 'success');
+                
+                playWelcomeAnimation(() => {
+                    startUserSession(true);
+                    showToast(`Bem-vindo, ${currentUser.name}!`, 'success');
+                });
             } else {
                 errorEl.classList.remove('hidden');
             }
+        }
+
+        // Welcome Splash Screen Animation Controller
+        function playWelcomeAnimation(callback) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const greeting = document.getElementById('welcomeUserGreeting');
+            const pBar = document.getElementById('welcomeProgressBar');
+
+            if (!overlay) {
+                if (callback) callback();
+                return;
+            }
+
+            greeting.textContent = `Bem-vindo(a), ${currentUser.name}!`;
+            pBar.style.width = '0%';
+            overlay.classList.remove('hidden');
+
+            safeCreateIcons();
+
+            setTimeout(() => {
+                pBar.style.width = '100%';
+            }, 100);
+
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('opacity-0');
+                    if (callback) callback();
+                }, 400);
+            }, 2000);
         }
 
         function handleLogout() {
@@ -1335,7 +1492,7 @@
             showToast('Você saiu do sistema.', 'info');
         }
 
-        function startUserSession() {
+        function startUserSession(isNewLogin = false) {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('dashboardScreen').classList.remove('hidden');
 
@@ -1358,7 +1515,7 @@
 
             loadFromStorage();
             initCurrentMonth();
-            updateUI();
+            updateUI(isNewLogin);
             safeCreateIcons();
         }
 
@@ -1407,7 +1564,7 @@
             safeCreateIcons();
         }
 
-        function handleAddNewUser(e) {
+        async function handleAddNewUser(e) {
             e.preventDefault();
             if (currentUser.role !== 'owner') return;
 
@@ -1431,23 +1588,23 @@
             };
 
             registeredUsers.push(newUser);
-            saveUsersToStorage();
+            await saveUsersToStorage();
             
             document.getElementById('addUserForm').reset();
             renderUsersList();
-            showToast(`Usuário ${name} cadastrado com sucesso!`, 'success');
+            showToast(`Usuário ${name} cadastrado e salvo na nuvem com sucesso! ☁️`, 'success');
         }
 
         function askDeleteUser(userId) {
             const u = registeredUsers.find(x => x.id === userId);
             if (!u || u.role === 'owner') return;
 
-            showConfirmModal('Excluir Usuário', `Tem certeza que deseja excluir o usuário "${u.name}"? Todos os dados deste usuário serão perdidos.`, () => {
+            showConfirmModal('Excluir Usuário', `Tem certeza que deseja excluir o usuário "${u.name}"? Todos os dados deste usuário serão perdidos.`, async () => {
                 registeredUsers = registeredUsers.filter(x => x.id !== userId);
-                saveUsersToStorage();
+                await saveUsersToStorage();
                 localStorage.removeItem(`innovae_user_data_${userId}`);
                 renderUsersList();
-                showToast('Usuário removido com sucesso.', 'warning');
+                showToast('Usuário removido da nuvem com sucesso.', 'warning');
             });
         }
 
@@ -1462,7 +1619,7 @@
             monthSelector.onchange = (e) => {
                 if (e.target.value) {
                     currentMonthKey = e.target.value;
-                    updateUI();
+                    updateUI(true);
                 }
             };
         }
@@ -1480,8 +1637,35 @@
             return dateStr;
         }
 
+        // Smooth Number Count-Up Animation Engine
+        function animateValue(elementId, targetVal, duration = 800) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            const startVal = 0;
+            const startTime = performance.now();
+
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const easeOutProgress = progress * (2 - progress);
+                const currentVal = startVal + (targetVal - startVal) * easeOutProgress;
+
+                el.textContent = formatBRL(currentVal);
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    el.textContent = formatBRL(targetVal);
+                }
+            }
+
+            requestAnimationFrame(updateNumber);
+        }
+
         // Calculations & UI Updates
-        function updateUI() {
+        function updateUI(animateNumbers = false) {
             const currentSalary = appData.salaries[currentMonthKey] || 0;
             const monthTransactions = appData.transactions.filter(t => t.date.startsWith(currentMonthKey));
 
@@ -1531,15 +1715,24 @@
             const balance = totalIncome - totalExpenses;
             const usagePercent = totalIncome > 0 ? Math.round((totalExpenses / totalIncome) * 100) : 0;
 
-            document.getElementById('cardIncome').textContent = formatBRL(totalIncome);
+            if (animateNumbers) {
+                animateValue('cardIncome', totalIncome);
+                animateValue('cardExpenses', totalExpenses);
+                animateValue('cardBalance', balance);
+                animateValue('cardMonthlyDebts', monthlyDebtsSum);
+            } else {
+                document.getElementById('cardIncome').textContent = formatBRL(totalIncome);
+                document.getElementById('cardExpenses').textContent = formatBRL(totalExpenses);
+                document.getElementById('cardBalance').textContent = formatBRL(balance);
+                document.getElementById('cardMonthlyDebts').textContent = formatBRL(monthlyDebtsSum);
+            }
+
             document.getElementById('cardSalaryBase').textContent = formatBRL(currentSalary);
             document.getElementById('cardExtraIncome').textContent = formatBRL(extraIncome);
 
-            document.getElementById('cardExpenses').textContent = formatBRL(totalExpenses);
             document.getElementById('pagoCount').textContent = `${paidExpensesCount} Pagas`;
             document.getElementById('pendenteCount').textContent = `${pendingExpensesCount} Pendentes`;
 
-            document.getElementById('cardMonthlyDebts').textContent = formatBRL(monthlyDebtsSum);
             document.getElementById('cardActiveDebtsCount').textContent = `${activeDebtGroups.size} Parcelamentos ativos`;
 
             const cardBalanceEl = document.getElementById('cardBalance');
@@ -1547,29 +1740,27 @@
             const balanceCardContainer = document.getElementById('balanceCardContainer');
             const balanceCardLabel = document.getElementById('balanceCardLabel');
 
-            cardBalanceEl.textContent = formatBRL(balance);
-
             if (balance >= 0) {
                 cardBalanceEl.className = "text-base sm:text-2xl font-black text-emerald-400";
                 balanceCardLabel.textContent = "Saldo Restante";
                 balanceStatusTextEl.textContent = `Sobra acumulada de ${formatBRL(balance)} neste mês.`;
-                balanceCardContainer.className = "col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/40 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition";
+                balanceCardContainer.className = "col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/40 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition duration-300";
             } else {
                 cardBalanceEl.className = "text-base sm:text-2xl font-black text-red-400";
                 balanceCardLabel.textContent = "Déficit / Falta";
                 balanceStatusTextEl.textContent = `Atenção: Gastos superaram a renda em ${formatBRL(Math.abs(balance))}.`;
-                balanceCardContainer.className = "col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition";
+                balanceCardContainer.className = "col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/50 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition duration-300";
             }
 
             document.getElementById('cardUsagePercent').textContent = `${usagePercent}%`;
             const progressBar = document.getElementById('usageProgressBar');
             progressBar.style.width = `${Math.min(usagePercent, 100)}%`;
             if (usagePercent > 90) {
-                progressBar.className = "bg-red-500 h-2 rounded-full transition-all duration-500";
+                progressBar.className = "bg-red-500 h-2 rounded-full transition-all duration-700 ease-out";
             } else if (usagePercent > 70) {
-                progressBar.className = "bg-amber-500 h-2 rounded-full transition-all duration-500";
+                progressBar.className = "bg-amber-500 h-2 rounded-full transition-all duration-700 ease-out";
             } else {
-                progressBar.className = "bg-yellow-400 h-2 rounded-full transition-all duration-500";
+                progressBar.className = "bg-yellow-400 h-2 rounded-full transition-all duration-700 ease-out";
             }
 
             // Update Goals Overview Summary Banner
@@ -1602,7 +1793,7 @@
             if (balance < 0) {
                 title.textContent = "Atenção: Orçamento no Vermelho!";
                 desc.textContent = `Você gastou ${formatBRL(Math.abs(balance))} a mais do que sua receita total. Reavalie compras parceladas.`;
-                iconContainer.className = "p-2.5 rounded-xl bg-red-500/20 text-red-400 shrink-0 border border-red-500/40";
+                iconContainer.className = "p-2.5 rounded-xl bg-red-500/20 text-red-400 shrink-0 border border-red-500/40 animate-pulse";
             } else if (usagePercent > 85) {
                 title.textContent = "Alerta de Limite Financeiro";
                 desc.textContent = `Você já comprometeu ${usagePercent}% da sua renda. Evite novas despesas ou parcelamentos este mês.`;
@@ -1655,6 +1846,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: { animateRotate: true, animateScale: true },
                         plugins: { legend: { display: false } }
                     }
                 });
@@ -1680,6 +1872,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1000
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -1713,14 +1910,14 @@
                 else if (cat === 'Investimentos') barColor = "bg-emerald-500";
 
                 const item = document.createElement('div');
-                item.className = "text-xs space-y-1 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800";
+                item.className = "text-xs space-y-1 bg-zinc-950 p-2.5 rounded-xl border border-zinc-800 hover:border-zinc-700 transition";
                 item.innerHTML = `
                     <div class="flex justify-between items-center font-semibold">
                         <span class="text-zinc-200">${cat}</span>
                         <span class="${pct > 100 ? 'text-red-400 font-bold' : 'text-zinc-400'}">${formatBRL(spent)} / ${formatBRL(target)}</span>
                     </div>
                     <div class="w-full bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
-                        <div class="${barColor} h-2 rounded-full transition-all duration-300" style="width: ${Math.min(pct, 100)}%"></div>
+                        <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${Math.min(pct, 100)}%"></div>
                     </div>
                 `;
                 container.appendChild(item);
@@ -1835,8 +2032,8 @@
                 group.items.forEach(t => {
                     const isReceita = t.type === 'receita';
                     const statusBadge = t.status === 'pago' 
-                        ? `<button onclick="toggleTxStatus('${t.id}')" title="Clique para alternar status" class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold cursor-pointer hover:bg-emerald-500/20 text-xs">Pago</button>`
-                        : `<button onclick="toggleTxStatus('${t.id}')" title="Clique para alternar status" class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 font-bold cursor-pointer hover:bg-red-500/20 text-xs">Pendente</button>`;
+                        ? `<button onclick="toggleTxStatus('${t.id}')" title="Clique para alternar status" class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold cursor-pointer hover:bg-emerald-500/20 text-xs active:scale-95 transition">Pago</button>`
+                        : `<button onclick="toggleTxStatus('${t.id}')" title="Clique para alternar status" class="px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 font-bold cursor-pointer hover:bg-red-500/20 text-xs active:scale-95 transition">Pendente</button>`;
 
                     const amountDisplay = isReceita 
                         ? `<span class="text-emerald-400 font-extrabold">+ ${formatBRL(t.amount)}</span>`
@@ -1950,8 +2147,8 @@
             appData.salaries[currentMonthKey] = val;
             saveToStorage();
             closeSalaryModal();
-            updateUI();
-            showToast('Salário atualizado!', 'success');
+            updateUI(true);
+            showToast('Salário atualizado com sucesso! 💰', 'success');
         }
 
         function openTransactionModal(editId = null) {
@@ -2101,7 +2298,7 @@
                             totalInstallments: totalInstallments
                         });
                     }
-                    showToast(`${totalInstallments - currentInstallment + 1} parcelas geradas com sucesso!`, 'success');
+                    showToast(`${totalInstallments - currentInstallment + 1} parcelas geradas com sucesso! 💳`, 'success');
                 } else {
                     const newTx = {
                         id: Date.now().toString(),
@@ -2120,13 +2317,13 @@
                         } : {})
                     };
                     appData.transactions.push(newTx);
-                    showToast('Transação adicionada!', 'success');
+                    showToast('Transação adicionada! ⚡', 'success');
                 }
             }
 
             saveToStorage();
             closeTransactionModal();
-            updateUI();
+            updateUI(true);
         }
 
         function askDeleteTransaction(id) {
@@ -2136,7 +2333,7 @@
             showConfirmModal('Excluir Lançamento', `Deseja apagar a transação "${tx.description}"?`, () => {
                 appData.transactions = appData.transactions.filter(t => t.id !== id);
                 saveToStorage();
-                updateUI();
+                updateUI(true);
                 showToast('Transação excluída.', 'info');
             });
         }
@@ -2160,7 +2357,7 @@
             if (goals.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10">
-                        <i data-lucide="target" class="w-10 h-10 text-emerald-400/50 mx-auto mb-2"></i>
+                        <i data-lucide="target" class="w-10 h-10 text-emerald-400/50 mx-auto mb-2 animate-bounce"></i>
                         <p class="text-xs text-zinc-400 font-bold">Nenhuma meta de investimento cadastrada.</p>
                         <p class="text-[11px] text-zinc-500 mt-0.5">Cadastre objetivos como "Reserva de Emergência", "Viagem" ou "Carro Novo".</p>
                     </div>
@@ -2173,7 +2370,6 @@
                     const current = parseFloat(g.currentAmount) || 0;
                     const pct = Math.min(100, Math.round((current / target) * 100));
 
-                    // Monthly calculation
                     const targetDateObj = new Date(g.targetDate + 'T00:00:00');
                     const monthsDiff = (targetDateObj.getFullYear() - now.getFullYear()) * 12 + (targetDateObj.getMonth() - now.getMonth());
                     const remainingMonths = Math.max(1, monthsDiff);
@@ -2181,7 +2377,7 @@
                     const monthlySavingsNeeded = remainingAmount / remainingMonths;
 
                     const div = document.createElement('div');
-                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3";
+                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 hover:border-emerald-500/40 transition duration-300";
                     div.innerHTML = `
                         <div class="flex justify-between items-start gap-2">
                             <div>
@@ -2212,15 +2408,15 @@
                                 <span class="font-bold text-emerald-400">${pct}% concluído</span>
                             </div>
                             <div class="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden border border-zinc-800">
-                                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
                             </div>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-1">
-                            <button onclick="promptDepositGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg flex items-center gap-1 transition">
+                            <button onclick="promptDepositGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg flex items-center gap-1 transition active:scale-95">
                                 <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Guardar Dinheiro
                             </button>
-                            <button onclick="promptWithdrawGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700 rounded-lg flex items-center gap-1 transition">
+                            <button onclick="promptWithdrawGoal('${g.id}')" class="px-3 py-1.5 text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700 rounded-lg flex items-center gap-1 transition active:scale-95">
                                 <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Resgatar
                             </button>
                         </div>
@@ -2254,8 +2450,8 @@
 
             document.getElementById('goalForm').reset();
             renderGoalsList();
-            updateUI();
-            showToast('Nova meta cadastrada com sucesso!', 'success');
+            updateUI(true);
+            showToast('Nova meta cadastrada com sucesso! 🎯', 'success');
         }
 
         function promptDepositGoal(goalId) {
@@ -2268,8 +2464,8 @@
                 goal.currentAmount = (parseFloat(goal.currentAmount) || 0) + val;
                 saveToStorage();
                 renderGoalsList();
-                updateUI();
-                showToast(`R$ ${val.toFixed(2)} adicionados à meta ${goal.name}!`, 'success');
+                updateUI(true);
+                showToast(`R$ ${val.toFixed(2)} adicionados à meta ${goal.name}! 🚀`, 'success');
             }
         }
 
@@ -2288,7 +2484,7 @@
                 goal.currentAmount = current - val;
                 saveToStorage();
                 renderGoalsList();
-                updateUI();
+                updateUI(true);
                 showToast(`R$ ${val.toFixed(2)} resgatados.`, 'info');
             }
         }
@@ -2301,7 +2497,7 @@
                 appData.goals = appData.goals.filter(g => g.id !== goalId);
                 saveToStorage();
                 renderGoalsList();
-                updateUI();
+                updateUI(true);
                 showToast('Meta removida.', 'info');
             });
         }
@@ -2351,7 +2547,7 @@
             if (groupKeys.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10">
-                        <i data-lucide="check-circle" class="w-10 h-10 text-emerald-400 mx-auto mb-2"></i>
+                        <i data-lucide="check-circle" class="w-10 h-10 text-emerald-400 mx-auto mb-2 animate-bounce"></i>
                         <p class="text-xs text-zinc-400 font-bold">Nenhum parcelamento ativo cadastrado.</p>
                         <p class="text-[11px] text-zinc-500 mt-0.5">Ao cadastrar um lançamento, marque "Compra Parcelada / Dívida".</p>
                     </div>
@@ -2362,7 +2558,7 @@
                     const pct = Math.round((group.paidInstallments / group.items.length) * 100);
 
                     const div = document.createElement('div');
-                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2";
+                    div.className = "bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2 hover:border-red-500/40 transition duration-300";
                     div.innerHTML = `
                         <div class="flex justify-between items-start gap-2">
                             <div>
@@ -2383,7 +2579,7 @@
                                 <span class="font-bold text-yellow-400">${group.paidInstallments} de ${group.items.length} pagas (${pct}%)</span>
                             </div>
                             <div class="w-full bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
-                                <div class="bg-yellow-400 h-2 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                                <div class="bg-yellow-400 h-2 rounded-full transition-all duration-700 ease-out" style="width: ${pct}%"></div>
                             </div>
                         </div>
                     `;
@@ -2404,7 +2600,7 @@
                 appData.transactions = appData.transactions.filter(t => t.installmentGroup !== groupId);
                 saveToStorage();
                 openDebtsModal();
-                updateUI();
+                updateUI(true);
                 showToast('Parcelamento removido.', 'info');
             });
         }
@@ -2442,7 +2638,7 @@
             });
             saveToStorage();
             closeBudgetsModal();
-            updateUI();
+            updateUI(true);
             showToast('Metas de orçamento atualizadas!', 'success');
         }
 
@@ -2513,7 +2709,7 @@
                         appData = imported;
                         if (!appData.goals) appData.goals = [];
                         saveToStorage();
-                        updateUI();
+                        updateUI(true);
                         showToast('Dados importados com sucesso!', 'success');
                     } else {
                         showToast('Arquivo JSON inválido.', 'red');
@@ -2531,7 +2727,7 @@
             showConfirmModal('Resetar Meus Dados', 'Tem certeza que deseja apagar todas as suas transações e dados financeiros deste usuário?', () => {
                 appData = { salaries: {}, transactions: [], goals: [], budgets: { "Moradia": 0, "Alimentação": 0, "Transporte": 0, "Saúde": 0, "Lazer": 0, "Educação": 0, "Investimentos": 0, "Outros": 0 } };
                 saveToStorage();
-                updateUI();
+                updateUI(true);
                 showToast('Seus dados foram resetados.', 'warning');
             });
         }
