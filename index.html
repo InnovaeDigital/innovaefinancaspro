@@ -131,6 +131,7 @@
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen transition-colors duration-200 mobile-bottom-padding antialiased selection:bg-yellow-400 selection:text-zinc-950">
 
+    <!-- FULL-SCREEN WELCOME OVERLAY WITH GLOWING LOGO & LOTTIE ANIMATION -->
     <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/98 backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <span class="absolute text-yellow-400/20 text-3xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
@@ -140,7 +141,7 @@
         </div>
 
         <div class="text-center p-6 max-w-md mx-auto relative z-10 animate-splash flex flex-col items-center">
-            <!-- Lottie Splash Animation -->
+            <!-- Lottie Splash Graphic -->
             <div class="w-48 h-48 mx-auto -mb-4">
                 <lottie-player 
                     src="https://assets10.lottiefiles.com/packages/lf20_m6482pxb.json" 
@@ -173,6 +174,7 @@
         </div>
     </div>
 
+    <!-- LOGIN SCREEN WITH USER DROPDOWN SELECT -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black relative overflow-hidden">
         
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
@@ -244,6 +246,7 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD APP SCREEN -->
     <div id="dashboardScreen" class="hidden min-h-screen p-3 sm:p-6 max-w-7xl mx-auto relative">
         
         <!-- Floating Finance Ambient Background Elements -->
@@ -350,6 +353,7 @@
             </div>
         </header>
 
+        <!-- Financial Metrics Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
             <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-emerald-500/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
@@ -549,6 +553,7 @@
             </div>
         </div>
 
+        <!-- Transaction Manager Section -->
         <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
             <div class="p-4 sm:p-5 border-b border-zinc-800 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
                 <div class="flex items-center gap-2">
@@ -1152,11 +1157,13 @@
             safeCreateIcons();
         });
 
-        // PURE CLOUD ENGINE - 100% REALTIME READ & WRITE (NO LOCALSTORAGE)
+        // PURE CLOUD ENGINE - 100% REALTIME READ & WRITE WITH CACHE-BUSTING
         async function syncFromCloudRealtime() {
             updateCloudUIState('syncing');
             try {
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest`, {
+                // Force cache-busting to prevent browsers from returning stale cached JSON responses
+                const cacheBuster = Date.now();
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest?cb=${cacheBuster}`, {
                     method: 'GET',
                     headers: {
                         'X-Master-Key': CLOUD_MASTER_KEY,
@@ -1167,7 +1174,7 @@
 
                 if (res.ok) {
                     const data = await res.json();
-                    const record = data.record;
+                    const record = data.record || data;
                     if (record) {
                         if (record.users && Array.isArray(record.users)) {
                             const map = new Map();
@@ -1232,10 +1239,10 @@
 
         function startRealTimeCloudPolling() {
             if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
-            // Fast real-time sync loop every 5 seconds
+            // Ultra-fast real-time sync loop every 2.5 seconds across devices
             realTimeCloudTimer = setInterval(async () => {
                 await syncFromCloudRealtime();
-            }, 5000);
+            }, 2500);
         }
 
         function updateCloudUIState(state) {
@@ -1368,7 +1375,7 @@
                     overlay.classList.remove('opacity-0');
                     if (callback) callback();
                 }, 400);
-            }, 2000);
+            }, 2200);
         }
 
         function handleLogout() {
@@ -1557,6 +1564,7 @@
             
             document.getElementById('addUserForm').reset();
             renderUsersList();
+            populateLoginUserSelect();
             showToast(`Usuário ${name} cadastrado na nuvem! ⚡`, 'success');
         }
 
@@ -1569,6 +1577,7 @@
                 delete allCloudUserDataMap[userId];
                 await pushDataToCloud();
                 renderUsersList();
+                populateLoginUserSelect();
                 showToast('Usuário removido da nuvem com sucesso.', 'warning');
             });
         }
