@@ -1345,10 +1345,19 @@
             }, 28);
         }
 
-        // JSONBin authentication: probe both supplied keys and both supported header types.
-        // This removes any dependency on the order in which the user pasted the keys.
-        let cloudAuth = null;
+        // JSONBin authentication is separated into READ and WRITE credentials.
+        // A read-enabled Access Key may be unable to PUT; therefore write requests
+        // probe the available credentials independently until one succeeds.
+        let cloudReadAuth = null;
+        let cloudWriteAuth = null;
         let cloudLastError = '';
+
+        const CLOUD_AUTH_CANDIDATES = [
+            { name: 'X-Access-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key / INNOVAE FINANÇAS PRO' },
+            { name: 'X-Master-Key', key: CLOUD_MASTER_KEY, label: 'Master Key' },
+            { name: 'X-Access-Key', key: CLOUD_MASTER_KEY, label: 'Master Key como Access' },
+            { name: 'X-Master-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key como Master' }
+        ];
 
         async function readCloudError(response) {
             try {
@@ -1384,32 +1393,26 @@
             }
         }
 
-        async function discoverCloudAuth() {
-            if (cloudAuth) return cloudAuth;
-
-            const candidates = [
-                { name: 'X-Access-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key / INNOVAE FINANÇAS PRO' },
-                { name: 'X-Master-Key', key: CLOUD_MASTER_KEY, label: 'Master Key' },
-                { name: 'X-Access-Key', key: CLOUD_MASTER_KEY, label: 'Master Key como Access' },
-                { name: 'X-Master-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key como Master' }
-            ];
+        async function probeCloudCredentials(path, options = {}, purpose = 'read') {
+            const candidates = purpose === 'write'
+                ? [
+                    { name: 'X-Master-Key', key: CLOUD_MASTER_KEY, label: 'Master Key' },
+                    { name: 'X-Access-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key / INNOVAE FINANÇAS PRO' },
+                    { name: 'X-Access-Key', key: CLOUD_MASTER_KEY, label: 'Master Key como Access' },
+                    { name: 'X-Master-Key', key: CLOUD_ACCESS_KEY, label: 'Access Key como Master' }
+                ]
+                : CLOUD_AUTH_CANDIDATES;
 
             const errors = [];
             for (const candidate of candidates) {
                 try {
-                    const response = await requestWithAuth(
-                        `${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`,
-                        { method: 'GET' },
-                        candidate.name,
-                        candidate.key
-                    );
-
+                    const response = await requestWithAuth(path, options, candidate.name, candidate.key);
                     if (response.ok) {
-                        cloudAuth = candidate;
+                        if (purpose === 'write') cloudWriteAuth = candidate;
+                        else cloudReadAuth = candidate;
                         cloudLastError = '';
-                        return candidate;
+                        return { response, auth: candidate };
                     }
-
                     const detail = await readCloudError(response);
                     errors.push(`${candidate.label}: HTTP ${response.status} — ${detail}`);
                 } catch (error) {
@@ -1418,29 +1421,34 @@
             }
 
             cloudLastError = errors.join(' | ');
-            throw new Error(`Não foi possível autenticar no JSONBin. ${cloudLastError}`);
+            throw new Error(`Falha na ${purpose === 'write' ? 'gravação' : 'leitura'} da nuvem. ${cloudLastError}`);
         }
 
         async function cloudFetch(path, options = {}) {
-            if (!cloudAuth) await discoverCloudAuth();
+            const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(String(options.method || 'GET').toUpperCase());
+            const authKey = isWrite ? 'cloudWriteAuth' : 'cloudReadAuth';
+            let auth = window[authKey];
+
+            if (!auth) {
+                const result = await probeCloudCredentials(path, options, isWrite ? 'write' : 'read');
+                return result.response;
+            }
 
             try {
-                let response = await requestWithAuth(path, options, cloudAuth.name, cloudAuth.key);
+                let response = await requestWithAuth(path, options, auth.name, auth.key);
+                if (response.ok) return response;
 
-                // If a previously valid credential was revoked, clear it and rediscover once.
-                if ((response.status === 401 || response.status === 403) && cloudAuth) {
-                    cloudAuth = null;
-                    await discoverCloudAuth();
-                    response = await requestWithAuth(path, options, cloudAuth.name, cloudAuth.key);
+                // A read credential can be valid but have no write permission.
+                // For writes, re-probe all candidates so a Master Key can take over.
+                if (isWrite || response.status === 401 || response.status === 403) {
+                    window[authKey] = null;
+                    const result = await probeCloudCredentials(path, options, isWrite ? 'write' : 'read');
+                    return result.response;
                 }
 
-                if (!response.ok) {
-                    const detail = await readCloudError(response);
-                    cloudLastError = `HTTP ${response.status}: ${detail}`;
-                    throw new Error(cloudLastError);
-                }
-
-                return response;
+                const detail = await readCloudError(response);
+                cloudLastError = `HTTP ${response.status}: ${detail}`;
+                throw new Error(cloudLastError);
             } catch (error) {
                 if (error?.name === 'AbortError') {
                     cloudLastError = 'Tempo limite ao conectar à nuvem (12s).';
@@ -1451,14 +1459,21 @@
             }
         }
 
+        // Keep the previous public variable for compatibility with existing code.
+        Object.defineProperty(window, 'cloudAuth', {
+            configurable: true,
+            get() { return cloudReadAuth || cloudWriteAuth; },
+            set(value) {
+                cloudReadAuth = value;
+                cloudWriteAuth = value;
+            }
+        });
+
         async function syncFromCloudRealtime(isSilent = true) {
             if (!isSilent) updateCloudUIState('syncing');
 
             try {
-                const res = await cloudFetch(`${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`, {
-                    method: 'GET'
-                });
-
+                const res = await cloudFetch(`${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`, { method: 'GET' });
                 const data = await res.json();
                 const record = data.record || data;
                 consecutiveCloudErrors = 0;
@@ -1524,27 +1539,28 @@
             realTimeCloudTimer = setInterval(() => syncFromCloudRealtime(true), 2200);
         }
 
-        async function pushDataToCloud() {
+        async function pushDataToCloud(customUsers = null, customUserDataMap = null) {
             updateCloudUIState('syncing');
             try {
-                if (!currentUser) return false;
+                // Always refresh the canonical cloud state before writing so that
+                // users/data created on another device are preserved.
+                const latestOk = await syncFromCloudRealtime(true);
+                if (!latestOk) throw new Error(cloudLastError || 'Não foi possível obter a versão atual da nuvem.');
 
-                // Preserve the local in-memory edit while refreshing the latest cloud copy
-                // so another device's changes to other users are not overwritten.
-                const pendingUserData = normalizeAppData(structuredCloneSafe(appData));
-                await syncFromCloudRealtime(true);
-                appData = pendingUserData;
+                const usersToSave = customUsers ? structuredCloneSafe(customUsers) : structuredCloneSafe(registeredUsers);
+                const dataToSave = customUserDataMap ? structuredCloneSafe(customUserDataMap) : structuredCloneSafe(allCloudUserDataMap);
 
-                const cloudDataBeforeWrite = structuredCloneSafe(allCloudUserDataMap);
-                cloudDataBeforeWrite[currentUser.id] = pendingUserData;
+                if (currentUser && !customUserDataMap) {
+                    dataToSave[currentUser.id] = normalizeAppData(structuredCloneSafe(appData));
+                }
 
                 const userMap = new Map();
                 userMap.set(OWNER_USER.id, OWNER_USER);
-                registeredUsers.forEach(u => { if (u?.id) userMap.set(u.id, u); });
+                usersToSave.forEach(u => { if (u?.id) userMap.set(u.id, u); });
 
                 const payload = {
                     users: Array.from(userMap.values()),
-                    allUserData: cloudDataBeforeWrite,
+                    allUserData: dataToSave,
                     updatedAt: new Date().toISOString()
                 };
 
@@ -1557,9 +1573,12 @@
                     body: JSON.stringify(payload)
                 });
 
-                allCloudUserDataMap = cloudDataBeforeWrite;
-                appData = normalizeAppData(allCloudUserDataMap[currentUser.id]);
-                lastSyncedDataHash = JSON.stringify(appData);
+                allCloudUserDataMap = dataToSave;
+                registeredUsers = Array.from(userMap.values());
+                if (currentUser && allCloudUserDataMap[currentUser.id]) {
+                    appData = normalizeAppData(allCloudUserDataMap[currentUser.id]);
+                    lastSyncedDataHash = JSON.stringify(appData);
+                }
                 consecutiveCloudErrors = 0;
                 window.cloudAvailable = true;
                 updateCloudUIState('synced');
@@ -1569,7 +1588,7 @@
                 window.cloudAvailable = false;
                 updateCloudUIState('error');
                 console.error('Falha ao gravar na nuvem:', error);
-                showToast('Não foi possível salvar na nuvem. Nenhum dado foi gravado localmente.', 'red');
+                showToast(`Não foi possível salvar na nuvem. ${cloudLastError || error?.message || ''}`, 'red');
                 return false;
             }
         }
@@ -1790,7 +1809,11 @@
                 document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
             }
 
-            await pushDataToCloud();
+            const saved = await pushDataToCloud();
+            if (!saved) {
+                showToast(`Não foi possível salvar as alterações de ${name} na nuvem.`, 'red');
+                return;
+            }
             closeEditUserModal();
             renderUsersList();
             populateLoginUserSelect();
@@ -1806,13 +1829,18 @@
             const password = document.getElementById('newPassword').value.trim();
             const role = document.getElementById('newRole').value;
 
-            if (registeredUsers.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+            if (!name || !username || !password) {
+                showToast('Preencha nome, usuário e senha.', 'red');
+                return;
+            }
+
+            if (registeredUsers.some(u => String(u.username || '').toLowerCase() === username.toLowerCase())) {
                 showToast('Este nome de usuário já existe no sistema.', 'red');
                 return;
             }
 
             const newUser = {
-                id: 'usr_' + Date.now(),
+                id: 'usr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
                 name,
                 username,
                 password,
@@ -1820,13 +1848,24 @@
                 createdAt: new Date().toISOString()
             };
 
-            registeredUsers.push(newUser);
-            await pushDataToCloud();
-            
+            // Prepare the entire shared cloud payload before changing the UI state.
+            const usersNext = [...registeredUsers, newUser];
+            const dataNext = structuredCloneSafe(allCloudUserDataMap);
+            dataNext[newUser.id] = normalizeAppData({ salaries: {}, transactions: [], goals: [], budgets: {} });
+
+            const saved = await pushDataToCloud(usersNext, dataNext);
+            if (!saved) {
+                showToast(`Usuário ${name} NÃO foi cadastrado na nuvem. Nenhuma alteração foi aplicada.`, 'red');
+                return;
+            }
+
+            // Only commit locally after the cloud write succeeded.
+            registeredUsers = usersNext;
+            allCloudUserDataMap = dataNext;
             document.getElementById('addUserForm').reset();
             renderUsersList();
             populateLoginUserSelect();
-            showToast(`Usuário ${name} cadastrado na nuvem! ⚡`, 'success');
+            showToast(`Usuário ${name} cadastrado e sincronizado na nuvem! ⚡`, 'success');
         }
 
         function askDeleteUser(userId) {
