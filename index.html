@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Innovae Finanças Pro - Gestão Financeira Pessoal</title>
+    <title>Innovae Finanças Pro - Gestão Financeira Inteligente</title>
     
     <!-- Favicon & PWA Icons -->
     <link rel="icon" type="image/png" href="LOGO.png">
@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Innovae Pro">
     <meta name="theme-color" content="#09090b">
-    <meta name="description" content="Innovae Finanças Pro - Gestão Financeira Inteligente">
+    <meta name="description" content="Innovae Finanças Pro - Gestão Financeira Inteligente em Nuvem">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,9 +48,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Lucide Icons & Chart.js -->
+    <!-- Lucide Icons, Chart.js & Lottie Player CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
     <style>
         body {
@@ -60,7 +61,6 @@
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
         }
-        /* Custom scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -76,7 +76,6 @@
             background: #facc15;
         }
         
-        /* Mobile Touch & Modal Sheet Optimizations */
         @media (max-width: 640px) {
             .mobile-bottom-padding {
                 padding-bottom: 5.5rem;
@@ -90,7 +89,6 @@
             }
         }
 
-        /* Keyframes Animations */
         @keyframes slideUpMobile {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
@@ -98,32 +96,21 @@
 
         @keyframes cloudPulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.95); }
+            50% { opacity: 0.5; transform: scale(0.96); }
         }
         .cloud-syncing {
-            animation: cloudPulse 1.2s infinite ease-in-out;
+            animation: cloudPulse 1s infinite ease-in-out;
         }
 
-        /* Floating Money / Particles Animation */
         @keyframes floatMoney {
-            0% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
-            50% { transform: translateY(-25px) rotate(12deg); opacity: 0.8; }
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.25; }
+            50% { transform: translateY(-25px) rotate(12deg); opacity: 0.85; }
             100% { transform: translateY(-50px) rotate(-6deg); opacity: 0; }
         }
         .animate-float-money {
             animation: floatMoney 4s infinite ease-in-out;
         }
 
-        /* Gold Glow Aura Animation */
-        @keyframes goldAura {
-            0%, 100% { box-shadow: 0 0 25px rgba(250, 204, 21, 0.25); }
-            50% { box-shadow: 0 0 50px rgba(250, 204, 21, 0.6); }
-        }
-        .gold-glow-aura {
-            animation: goldAura 3s infinite ease-in-out;
-        }
-
-        /* Modal Entrance Animation */
         @keyframes modalEnter {
             from { opacity: 0; transform: scale(0.92) translateY(15px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
@@ -132,16 +119,6 @@
             animation: modalEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* Rising Income Icon Effect */
-        @keyframes riseUp {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        .animate-rise {
-            animation: riseUp 2s infinite ease-in-out;
-        }
-
-        /* Welcome Splash Reveal Animation */
         @keyframes splashZoom {
             0% { opacity: 0; transform: scale(0.85); }
             50% { opacity: 1; transform: scale(1.02); }
@@ -154,9 +131,7 @@
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen transition-colors duration-200 mobile-bottom-padding antialiased selection:bg-yellow-400 selection:text-zinc-950">
 
-    <!-- WELCOME ANIMATION OVERLAY -->
-    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/95 backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
-        <!-- Floating Finance Background Particles -->
+    <div id="welcomeOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/98 backdrop-blur-2xl hidden transition-opacity duration-500 pointer-events-none">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <span class="absolute text-yellow-400/20 text-3xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
             <span class="absolute text-emerald-400/20 text-4xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1s;">+ %</span>
@@ -164,55 +139,76 @@
             <span class="absolute text-yellow-400/20 text-5xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 1.5s;">R$</span>
         </div>
 
-        <div class="text-center p-6 max-w-md mx-auto relative z-10 animate-splash">
-            <div class="inline-block relative mb-4">
-                <div class="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-300 rounded-full blur-xl opacity-60 animate-pulse"></div>
-                <img src="LOGO.png" alt="Innovae Pro Logo" class="relative h-24 sm:h-28 mx-auto object-contain drop-shadow-[0_10px_25px_rgba(250,204,21,0.5)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+        <div class="text-center p-6 max-w-md mx-auto relative z-10 animate-splash flex flex-col items-center">
+            <!-- Lottie Splash Animation -->
+            <div class="w-48 h-48 mx-auto -mb-4">
+                <lottie-player 
+                    src="https://assets10.lottiefiles.com/packages/lf20_m6482pxb.json" 
+                    background="transparent" 
+                    speed="1" 
+                    loop 
+                    autoplay
+                    onerror="this.style.display='none'">
+                </lottie-player>
             </div>
 
-            <div class="space-y-2 mt-2">
+            <div class="inline-block relative mb-3">
+                <div class="absolute -inset-2 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-300 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                <img src="LOGO.png" alt="Innovae Pro Logo" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_10px_25px_rgba(250,204,21,0.5)]" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+            </div>
+
+            <div class="space-y-1 mt-1">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-xs font-extrabold text-yellow-400">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Autenticação Concluída
+                    <i data-lucide="cloud-lightning" class="w-3.5 h-3.5"></i> Sincronização em Nuvem Ativa
                 </span>
                 <h2 id="welcomeUserGreeting" class="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                    Bem-vindo(a) ao Innovae Pro!
+                    Bem-vindo(a)!
                 </h2>
-                <p class="text-xs text-zinc-400">Sincronizando seus dados financeiros na nuvem...</p>
+                <p class="text-xs text-zinc-400">Conectando ao banco de dados em nuvem em tempo real...</p>
             </div>
 
-            <!-- Animated Progress Bar -->
-            <div class="w-full bg-zinc-900 border border-zinc-800 rounded-full h-2 mt-6 overflow-hidden">
+            <div class="w-full bg-zinc-900 border border-zinc-800 rounded-full h-2 mt-5 overflow-hidden">
                 <div id="welcomeProgressBar" class="bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black relative overflow-hidden">
         
-        <!-- Ambient Finance Icons Background -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
-            <i data-lucide="trending-up" class="w-24 h-24 text-yellow-400 absolute -top-5 -left-5 animate-pulse"></i>
-            <i data-lucide="wallet" class="w-32 h-32 text-amber-500 absolute bottom-10 right-5 opacity-50"></i>
-            <i data-lucide="pie-chart" class="w-20 h-20 text-emerald-400 absolute top-1/3 right-10"></i>
+            <span class="absolute text-yellow-400 text-3xl font-black left-8 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
+            <span class="absolute text-emerald-400 text-4xl font-black right-10 top-1/3 animate-float-money" style="animation-delay: 1.2s;">+ %</span>
+            <span class="absolute text-amber-400 text-3xl font-black left-1/3 bottom-1/4 animate-float-money" style="animation-delay: 2.2s;">💰</span>
         </div>
 
         <div class="w-full max-w-md bg-zinc-900/90 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(250,204,21,0.08)] backdrop-blur-xl relative overflow-hidden">
             <div class="absolute -top-24 -right-24 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none"></div>
             
-            <div class="text-center mb-6">
-                <!-- LOGO DISPLAY -->
-                <div class="inline-block relative mb-3 group cursor-pointer">
+            <div class="text-center mb-4">
+                <!-- Lottie Animated Header Graphic -->
+                <div class="w-32 h-32 mx-auto -mb-2">
+                    <lottie-player 
+                        src="https://assets9.lottiefiles.com/packages/lf20_ygi38a4d.json" 
+                        background="transparent" 
+                        speed="1" 
+                        loop 
+                        autoplay
+                        onerror="this.style.display='none'">
+                    </lottie-player>
+                </div>
+
+                <div class="inline-block relative mb-2 group cursor-pointer">
                     <div class="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-amber-600 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500"></div>
-                    <img src="LOGO.png" alt="Innovae Finanças Pro" class="relative h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.8)] transition transform group-hover:scale-105 duration-300" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
+                    <img src="LOGO.png" alt="Innovae Finanças Pro" class="relative h-18 sm:h-22 mx-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.8)] transition transform group-hover:scale-105 duration-300" onerror="this.onerror=null; this.src='https://placehold.co/240x100/121215/facc15?text=INNOVAE+PRO';">
                 </div>
                 <h1 class="text-2xl font-black tracking-tight bg-gradient-to-r from-zinc-100 via-yellow-300 to-amber-500 bg-clip-text text-transparent">
                     Innovae Finanças Pro
                 </h1>
                 <p class="text-xs text-zinc-400 mt-1">Selecione seu usuário e digite a senha para acessar</p>
+                
                 <div id="loginCloudStatus" class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] font-bold text-zinc-400">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Nuvem Ativa</span>
+                    <span id="loginCloudText">Nuvem em Tempo Real Ativa</span>
                 </div>
             </div>
 
@@ -221,8 +217,8 @@
                     <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Usuário</label>
                     <div class="relative">
                         <i data-lucide="user" class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-10"></i>
-                        <select id="loginUserSelect" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400 transition cursor-pointer appearance-none">
-                            <!-- Populated dynamically -->
+                        <select id="loginUserSelect" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400 transition cursor-pointer appearance-none">
+                            <!-- Populated dynamically from cloud -->
                         </select>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-zinc-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                     </div>
@@ -241,38 +237,45 @@
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-zinc-950 font-black py-3 rounded-xl transition duration-200 shadow-lg shadow-yellow-500/20 active:scale-95 flex items-center justify-center gap-2 group">
-                    <span>Acessar o Painel</span>
+                    <span>Acessar o Painel em Nuvem</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition duration-200"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD APP SCREEN -->
     <div id="dashboardScreen" class="hidden min-h-screen p-3 sm:p-6 max-w-7xl mx-auto relative">
         
-        <!-- Ambient Finance Floating Background Elements -->
+        <!-- Floating Finance Ambient Background Elements -->
         <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-15">
             <span class="absolute text-yellow-400 text-4xl font-black left-10 top-1/4 animate-float-money" style="animation-delay: 0s;">R$</span>
             <span class="absolute text-emerald-400 text-5xl font-black right-12 top-1/3 animate-float-money" style="animation-delay: 1.5s;">+ %</span>
             <span class="absolute text-amber-400 text-3xl font-black left-1/3 bottom-1/4 animate-float-money" style="animation-delay: 2.5s;">💰</span>
             <span class="absolute text-yellow-400 text-6xl font-black right-1/4 bottom-1/3 animate-float-money" style="animation-delay: 0.8s;">R$</span>
             <i data-lucide="trending-up" class="w-40 h-40 text-yellow-500/10 absolute top-10 right-1/4 animate-pulse"></i>
-            <i data-lucide="piggy-bank" class="w-48 h-48 text-emerald-500/10 absolute bottom-10 left-10"></i>
         </div>
 
-        <!-- Header Bar -->
+        <!-- Navigation Header Bar -->
         <header class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80 mb-6 relative z-10">
-            <!-- Global Controls & User Pill -->
+            <div class="flex items-center gap-3">
+                <img src="LOGO.png" alt="Innovae Pro Logo" class="h-10 sm:h-12 object-contain" onerror="this.onerror=null; this.src='https://placehold.co/120x50/121215/facc15?text=INNOVAE';">
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-zinc-100 tracking-tight flex items-center gap-2">
+                        Innovae Finanças <span class="text-yellow-400">Pro</span>
+                    </h1>
+                    <p class="text-xs text-zinc-400">Gestão em Nuvem & Sincronização em Tempo Real</p>
+                </div>
+            </div>
+
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 justify-end">
                 
-                <!-- Cloud Sync Status Badge -->
-                <div id="cloudSyncBadge" class="flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/30 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400" title="Banco de Dados na Nuvem Ativo">
-                    <i data-lucide="cloud" class="w-4 h-4 text-yellow-400"></i>
-                    <span id="cloudStatusText" class="hidden sm:inline">Nuvem Conectada</span>
+                <!-- Cloud Real-time Badge -->
+                <div id="cloudSyncBadge" class="flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400" title="Banco de Dados em Nuvem em Tempo Real">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="cloudStatusText" class="hidden sm:inline">Nuvem em Tempo Real ⚡</span>
                 </div>
 
-                <!-- Active User Badge -->
+                <!-- Active User Pill -->
                 <div class="flex items-center gap-2 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner hover:border-zinc-700 transition">
                     <div class="w-7 h-7 rounded-lg bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 flex items-center justify-center font-bold text-xs" id="userAvatar">
                         D
@@ -286,19 +289,18 @@
                     </div>
                 </div>
 
-                <!-- Admin Users Button (Visible ONLY to Owner) -->
-                <button id="btnAdminUsers" onclick="openUsersAdminModal()" class="hidden flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95" title="Apenas o proprietário pode adicionar usuários">
+                <!-- Admin Users Button -->
+                <button id="btnAdminUsers" onclick="openUsersAdminModal()" class="hidden flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95" title="Gerenciar Usuários do Sistema">
                     <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
                     <span class="hidden sm:inline">Usuários</span>
                 </button>
 
-                <!-- Select Mês / Ano -->
+                <!-- Month Selector -->
                 <div class="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 shadow-inner">
                     <i data-lucide="calendar" class="w-4 h-4 text-yellow-400 mr-2"></i>
                     <input type="month" id="monthSelector" class="bg-transparent text-xs sm:text-sm font-semibold focus:outline-none text-zinc-200 cursor-pointer">
                 </div>
 
-                <!-- Action buttons -->
                 <button onclick="openSalaryModal()" class="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-yellow-400 border border-yellow-400/30 font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95">
                     <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-yellow-400"></i>
                     <span class="hidden sm:inline">Ajustar</span> Salário
@@ -319,7 +321,6 @@
                     <span>Nova Transação</span>
                 </button>
 
-                <!-- Logout Button -->
                 <button onclick="handleLogout()" class="p-2.5 bg-zinc-800 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 border border-zinc-700 rounded-xl transition" title="Sair da Conta">
                     <i data-lucide="log-out" class="w-4 h-4"></i>
                 </button>
@@ -349,13 +350,11 @@
             </div>
         </header>
 
-        <!-- Financial Metrics Cards (Responsive Grid) -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
-            <!-- Salário / Receitas (Green) -->
             <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-emerald-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-emerald-500/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-400">Renda Mensal</span>
-                    <span class="p-1.5 sm:p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 animate-rise">
+                    <span class="p-1.5 sm:p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
                         <i data-lucide="arrow-down-left" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                     </span>
                 </div>
@@ -367,7 +366,6 @@
                 </div>
             </div>
 
-            <!-- Gastos Totais (Red) -->
             <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-500/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-red-400">Despesas Totais</span>
@@ -383,7 +381,6 @@
                 </div>
             </div>
 
-            <!-- Sobra ou Falta (Dynamic Green/Red) -->
             <div id="balanceCardContainer" class="col-span-2 sm:col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-400" id="balanceCardLabel">Saldo Restante</span>
@@ -397,7 +394,6 @@
                 </div>
             </div>
 
-            <!-- Parcelas / Dívidas (Red / Yellow Accent) -->
             <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-red-500/40 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-red-400 transition duration-300 cursor-pointer" onclick="openDebtsModal()">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-red-400">Dívidas & Parcelas</span>
@@ -412,7 +408,6 @@
                 </div>
             </div>
 
-            <!-- Porcentagem do Salário Comprometida (Yellow) -->
             <div class="col-span-1 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-yellow-400/30 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl relative overflow-hidden group hover:border-yellow-400/60 transition duration-300">
                 <div class="flex justify-between items-start mb-2">
                     <span class="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-yellow-400">% Renda Usada</span>
@@ -421,14 +416,12 @@
                     </span>
                 </div>
                 <div class="text-base sm:text-2xl font-black text-yellow-400 tracking-tight transition-all" id="cardUsagePercent">0%</div>
-                <!-- Mini Progress Bar -->
                 <div class="w-full bg-zinc-950 rounded-full h-2 mt-3 overflow-hidden border border-zinc-800">
                     <div id="usageProgressBar" class="bg-yellow-400 h-2 rounded-full transition-all duration-700 ease-out" style="width: 0%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Financial Health Status Banner -->
         <div id="healthBanner" class="mb-8 p-4 rounded-2xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-900/60 border-zinc-800 shadow-xl transition-all duration-300">
             <div class="flex items-center gap-3">
                 <div id="healthBannerIcon" class="p-2.5 rounded-xl bg-zinc-800 text-yellow-400 border border-zinc-700 shrink-0">
@@ -448,8 +441,15 @@
         <!-- Planning & Goals Overview Banner -->
         <div class="mb-8 p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 relative overflow-hidden group hover:border-emerald-500/50 transition">
             <div class="flex items-center gap-3.5">
-                <div class="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0 animate-pulse">
-                    <i data-lucide="vault" class="w-7 h-7"></i>
+                <div class="w-16 h-16 shrink-0 -my-2">
+                    <lottie-player 
+                        src="https://assets4.lottiefiles.com/packages/lf20_mbe9u1ff.json" 
+                        background="transparent" 
+                        speed="1" 
+                        loop 
+                        autoplay
+                        onerror="this.style.display='none'">
+                    </lottie-player>
                 </div>
                 <div>
                     <h3 class="font-extrabold text-base text-zinc-100 flex items-center gap-2">
@@ -472,8 +472,6 @@
 
         <!-- Charts & Analysis Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
-            
-            <!-- Gráfico 1: Gastos por Categoria -->
             <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 shadow-2xl flex flex-col">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-extrabold text-zinc-100 flex items-center gap-2 text-sm">
@@ -486,7 +484,6 @@
                 </div>
             </div>
 
-            <!-- Análise Regra 50/30/20 -->
             <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 shadow-2xl flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
@@ -500,7 +497,6 @@
                         Ideal: <strong class="text-zinc-200">50%</strong> Necessidades | <strong class="text-zinc-200">30%</strong> Desejos | <strong class="text-emerald-400">20%</strong> Investimentos
                     </p>
 
-                    <!-- Bar 1: Necessidades (50%) -->
                     <div class="mb-3.5">
                         <div class="flex justify-between text-xs mb-1">
                             <span class="text-zinc-300 font-semibold">1. Necessidades (Essencial)</span>
@@ -511,7 +507,6 @@
                         </div>
                     </div>
 
-                    <!-- Bar 2: Desejos / Lazer (30%) -->
                     <div class="mb-3.5">
                         <div class="flex justify-between text-xs mb-1">
                             <span class="text-zinc-300 font-semibold">2. Desejos & Estilo de Vida</span>
@@ -522,7 +517,6 @@
                         </div>
                     </div>
 
-                    <!-- Bar 3: Investimentos / Reservas (20%) -->
                     <div class="mb-3.5">
                         <div class="flex justify-between text-xs mb-1">
                             <span class="text-zinc-300 font-semibold text-emerald-400">3. Poupança & Investimentos</span>
@@ -539,7 +533,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico 2: Orçamento vs Categorias (Progresso) -->
             <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-5 shadow-2xl flex flex-col">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-extrabold text-zinc-100 flex items-center gap-2 text-sm">
@@ -554,13 +547,9 @@
                     <!-- Populated dynamically -->
                 </div>
             </div>
-
         </div>
 
-        <!-- Transaction Manager Section -->
         <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
-            
-            <!-- Toolbar -->
             <div class="p-4 sm:p-5 border-b border-zinc-800 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
                 <div class="flex items-center gap-2">
                     <h2 class="text-base sm:text-lg font-black text-zinc-100 flex items-center gap-2">
@@ -570,15 +559,12 @@
                     <span id="transactionCounterBadge" class="bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 text-xs px-2.5 py-0.5 rounded-full font-bold">0</span>
                 </div>
 
-                <!-- Filters -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Search Input -->
                     <div class="relative flex-1 sm:w-48">
                         <i data-lucide="search" class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
                         <input type="text" id="searchInput" placeholder="Buscar lançamentos..." oninput="renderTransactions()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-yellow-400">
                     </div>
 
-                    <!-- Modalidade Filter -->
                     <select id="filterModalidade" onchange="renderTransactions()" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-yellow-400 font-bold focus:outline-none focus:border-yellow-400">
                         <option value="ALL">Todas as Modalidades</option>
                         <option value="a_vista">💵 Pagos à Vista</option>
@@ -586,7 +572,6 @@
                         <option value="a_prazo">⏳ À Prazo</option>
                     </select>
 
-                    <!-- Category Filter -->
                     <select id="filterCategory" onchange="renderTransactions()" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-yellow-400">
                         <option value="ALL">Todas as Categorias</option>
                         <option value="Moradia">Moradia</option>
@@ -599,7 +584,6 @@
                         <option value="Outros">Outros</option>
                     </select>
 
-                    <!-- Type Filter -->
                     <select id="filterType" onchange="renderTransactions()" class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-yellow-400">
                         <option value="ALL">Todos os Tipos</option>
                         <option value="despesa">Despesas</option>
@@ -608,7 +592,6 @@
                 </div>
             </div>
 
-            <!-- Modality Totals Header Bar -->
             <div class="bg-zinc-950/80 border-b border-zinc-800/80 px-4 sm:px-5 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                 <div class="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
                     <span class="font-bold text-emerald-400 flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Pagos à Vista</span>
@@ -624,7 +607,6 @@
                 </div>
             </div>
 
-            <!-- Desktop Transactions Table -->
             <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left text-sm text-zinc-300">
                     <thead class="bg-zinc-950 text-xs text-zinc-400 uppercase tracking-wider border-b border-zinc-800">
@@ -644,14 +626,21 @@
                 </table>
             </div>
 
-            <!-- Mobile Transaction Cards View -->
             <div id="mobileTransactionCards" class="block sm:hidden divide-y divide-zinc-800/80">
                 <!-- Populated dynamically on mobile -->
             </div>
 
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden text-center py-12 px-4">
-                <i data-lucide="receipt" class="w-12 h-12 text-zinc-600 mx-auto mb-3"></i>
+            <div id="emptyState" class="hidden text-center py-12 px-4 flex flex-col items-center">
+                <div class="w-32 h-32 mx-auto mb-2">
+                    <lottie-player 
+                        src="https://assets7.lottiefiles.com/packages/lf20_klj2z8wb.json" 
+                        background="transparent" 
+                        speed="1" 
+                        loop 
+                        autoplay
+                        onerror="this.style.display='none'">
+                    </lottie-player>
+                </div>
                 <p class="text-zinc-400 font-medium text-sm">Nenhuma transação encontrada neste mês.</p>
                 <p class="text-xs text-zinc-500 mt-1">Clique em "Nova Transação" para começar a organizar.</p>
             </div>
@@ -659,7 +648,7 @@
 
     </div>
 
-    <!-- MODAL 1: Admin Usuários (Proprietário) -->
+    <!-- MODAL 1: Admin Usuários -->
     <div id="usersAdminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-amber-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeUsersAdminModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -672,11 +661,10 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-black text-zinc-100">Gerenciar Usuários do Sistema</h3>
-                    <p class="text-xs text-zinc-400">Área exclusiva do proprietário (<strong class="text-amber-400">David P. Tomé</strong>)</p>
+                    <p class="text-xs text-zinc-400">Gerenciamento de contas e credenciais gravadas na nuvem</p>
                 </div>
             </div>
 
-            <!-- Add User Form -->
             <form id="addUserForm" onsubmit="handleAddNewUser(event)" class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 mb-4 shrink-0">
                 <h4 class="text-xs font-bold text-yellow-400 uppercase tracking-wider">Cadastrar Novo Usuário</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -704,15 +692,14 @@
                 </div>
                 <div class="flex justify-end pt-1">
                     <button type="submit" class="bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-bold text-xs px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
-                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Criar Conta de Usuário
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Criar Conta na Nuvem
                     </button>
                 </div>
             </form>
 
-            <!-- Users List Table -->
-            <div class="flex-1 overflow-y-auto border border-zinc-800 rounded-xl bg-zinc-950">
+            <div class="flex-1 overflow-y-auto border border-zinc-800 rounded-xl bg-zinc-950 min-h-[160px]">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-zinc-900 text-zinc-400 uppercase tracking-wider border-b border-zinc-800">
+                    <thead class="bg-zinc-900 text-zinc-400 uppercase tracking-wider border-b border-zinc-800 sticky top-0">
                         <tr>
                             <th class="py-2.5 px-3">Nome</th>
                             <th class="py-2.5 px-3">Login</th>
@@ -726,13 +713,13 @@
                 </table>
             </div>
 
-            <div class="flex justify-end pt-4 border-t border-zinc-800 shrink-0">
+            <div class="flex justify-end pt-4 border-t border-zinc-800 shrink-0 mt-3">
                 <button onclick="closeUsersAdminModal()" class="px-5 py-2 text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL EDIT USER (Editar Dados do Usuário) -->
+    <!-- MODAL EDIT USER -->
     <div id="editUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-yellow-400/30 rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-modal-enter">
             <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -745,7 +732,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-zinc-100">Editar Usuário</h3>
-                    <p class="text-xs text-zinc-400">Atualize as credenciais e permissões da conta</p>
+                    <p class="text-xs text-zinc-400">Atualize as credenciais e permissões da conta em nuvem</p>
                 </div>
             </div>
 
@@ -778,13 +765,49 @@
 
                 <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
                     <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-950 rounded-xl shadow-lg">Salvar Alterações</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-950 rounded-xl shadow-lg">Salvar na Nuvem</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 3: Nova / Editar Transação -->
+    <!-- MODAL SALARY -->
+    <div id="salaryModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet animate-modal-enter">
+            <button onclick="closeSalaryModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="flex items-center gap-3 mb-5">
+                <div class="p-2.5 bg-yellow-400/10 text-yellow-400 rounded-xl border border-yellow-400/30">
+                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-zinc-100">Configurar Renda Mensal</h3>
+                    <p class="text-xs text-zinc-400">Informe seu salário base fixo do mês</p>
+                </div>
+            </div>
+
+            <form id="salaryForm" onsubmit="saveSalary(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Salário Base Líquido (R$)</label>
+                    <input type="number" step="0.01" id="inputBaseSalary" placeholder="Ex: 3500.00" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400">
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-xs text-zinc-400">
+                    <i data-lucide="info" class="w-4 h-4 inline mr-1 text-yellow-400"></i>
+                    Receitas adicionais (como bônus ou freelas) podem ser cadastradas como "Nova Transação > Receita Extra".
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeSalaryModal()" class="px-4 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-950 rounded-xl shadow-lg">Salvar Renda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TRANSACTION -->
     <div id="transactionModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto mobile-modal-sheet animate-modal-enter">
             <button onclick="closeTransactionModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -804,7 +827,6 @@
             <form id="transactionForm" onsubmit="saveTransaction(event)" class="space-y-4">
                 <input type="hidden" id="editTransactionId">
 
-                <!-- Type Selector -->
                 <div class="grid grid-cols-2 gap-3">
                     <label class="cursor-pointer">
                         <input type="radio" name="txType" value="despesa" checked class="peer hidden" onchange="toggleTxTypeStyle()">
@@ -825,7 +847,6 @@
                     <input type="text" id="txDescription" placeholder="Ex: Aluguel, Mercado, Fatura..." required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400">
                 </div>
 
-                <!-- Payment Method / Modalidade Selection -->
                 <div>
                     <label class="block text-xs font-semibold text-zinc-300 mb-1.5">Modalidade / Forma de Pagamento</label>
                     <select id="txPaymentMethod" onchange="handleModalMethodChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:border-yellow-400">
@@ -869,7 +890,6 @@
                     </div>
                 </div>
 
-                <!-- Installment Toggle Section -->
                 <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 space-y-3">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" id="txIsInstallment" onchange="toggleInstallmentFields()" class="rounded border-zinc-700 text-yellow-400 focus:ring-yellow-400 bg-zinc-900 w-4 h-4">
@@ -896,7 +916,6 @@
                     </div>
                 </div>
 
-                <!-- Recurring Checkbox -->
                 <div class="flex items-center gap-2 px-1">
                     <input type="checkbox" id="txRecurring" class="rounded border-zinc-700 text-yellow-400 focus:ring-yellow-400 bg-zinc-950 w-4 h-4">
                     <label for="txRecurring" class="text-xs text-zinc-300">Despesa fixa recorrente todos os meses</label>
@@ -910,7 +929,7 @@
         </div>
     </div>
 
-    <!-- MODAL 4: Gerenciador de Dívidas e Parcelamentos -->
+    <!-- MODAL DEBTS -->
     <div id="debtsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeDebtsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -948,7 +967,7 @@
         </div>
     </div>
 
-    <!-- MODAL 5: Planejamento & Metas Financeiras (Cofrinho) -->
+    <!-- MODAL GOALS -->
     <div id="goalsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-emerald-500/30 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative max-h-[90vh] flex flex-col mobile-modal-sheet animate-modal-enter">
             <button onclick="closeGoalsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -965,7 +984,6 @@
                 </div>
             </div>
 
-            <!-- Create New Goal Form -->
             <form id="goalForm" onsubmit="handleSaveGoal(event)" class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 mb-4 shrink-0">
                 <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Criar Novo Objetivo</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -989,7 +1007,6 @@
                 </div>
             </form>
 
-            <!-- Goals Cards Container -->
             <div id="goalsListContainer" class="flex-1 overflow-y-auto space-y-3 pr-1">
                 <!-- Populated dynamically -->
             </div>
@@ -1000,7 +1017,7 @@
         </div>
     </div>
 
-    <!-- MODAL 6: Gerenciador de Metas por Categoria (Tetos) -->
+    <!-- MODAL BUDGETS -->
     <div id="budgetsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative mobile-modal-sheet animate-modal-enter">
             <button onclick="closeBudgetsModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-white">
@@ -1030,7 +1047,7 @@
         </div>
     </div>
 
-    <!-- MODAL 7: Confirmação Personalizada sem alert() -->
+    <!-- MODAL CONFIRM -->
     <div id="confirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative text-center animate-modal-enter">
             <div class="p-3 bg-red-500/10 text-red-400 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center border border-red-500/30">
@@ -1058,7 +1075,6 @@
             <span>Metas</span>
         </button>
 
-        <!-- Floating Glowing Center Action Button -->
         <button onclick="openTransactionModal()" class="flex items-center justify-center w-13 h-13 rounded-full bg-gradient-to-tr from-yellow-500 to-yellow-300 text-zinc-950 font-black shadow-[0_0_20px_rgba(250,204,21,0.5)] active:scale-90 -mt-6 border-4 border-zinc-950 transition duration-200">
             <i data-lucide="plus" class="w-7 h-7 stroke-[3]"></i>
         </button>
@@ -1077,19 +1093,12 @@
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed bottom-20 sm:bottom-5 right-5 z-50 flex flex-col gap-2"></div>
 
-    <!-- JAVASCRIPT APP LOGIC ENGINE -->
     <script>
-        // CLOUD DATABASE API CONFIGURATION (JSONbin.io Engine)
+        // CLOUD DATABASE API ENGINE (JSONbin.io High-Speed Stream)
         const CLOUD_MASTER_KEY = '$2a$10$xjbmNJ34NWSjCcDmWwY8BO34DUS0DTze4hsHew9.AjxW0jcjIqcFe';
         const CLOUD_ACCESS_KEY = '$2a$10$aQizQ/cW0Nm5g6oVYEeRo./tFqUbbzj8TrDPdViFiKxeDBszlkj9S';
-        const CLOUD_BIN_ID_STORAGE_KEY = 'innovae_cloud_bin_id_v2';
-        const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
-        // Shared Fixed Master Bin ID for unified cross-device sync
         const SHARED_MASTER_BIN_ID = '67ad840be4101579cf43f389';
-
-        // System Auth & Users State
-        const SYSTEM_USERS_KEY = 'innovae_users_list_v2';
-        const CURRENT_SESSION_KEY = 'innovae_current_session_v2';
+        const JSONBIN_ENDPOINT = 'https://api.jsonbin.io/v3/b';
 
         // Pre-seeded Owner Account
         const OWNER_USER = {
@@ -1101,42 +1110,33 @@
             createdAt: '2026-01-01'
         };
 
-        let registeredUsers = [];
+        // Live In-Memory State
+        let registeredUsers = [OWNER_USER];
         let currentUser = null;
+        let allCloudUserDataMap = {};
 
-        // Current Active User Data (Zero Default State)
+        // Active Selected User Data
         let appData = {
             salaries: {},
             transactions: [],
             goals: [],
             budgets: {
-                "Moradia": 0,
-                "Alimentação": 0,
-                "Transporte": 0,
-                "Saúde": 0,
-                "Lazer": 0,
-                "Educação": 0,
-                "Investimentos": 0,
-                "Outros": 0
+                "Moradia": 0, "Alimentação": 0, "Transporte": 0, "Saúde": 0,
+                "Lazer": 0, "Educação": 0, "Investimentos": 0, "Outros": 0
             }
         };
 
         const categories = ["Moradia", "Alimentação", "Transporte", "Saúde", "Lazer", "Educação", "Investimentos", "Outros"];
         
         const rule503020Map = {
-            "Moradia": "nec",
-            "Alimentação": "nec",
-            "Transporte": "nec",
-            "Saúde": "nec",
-            "Educação": "nec",
-            "Lazer": "des",
-            "Outros": "des",
-            "Investimentos": "inv"
+            "Moradia": "nec", "Alimentação": "nec", "Transporte": "nec", "Saúde": "nec", "Educação": "nec",
+            "Lazer": "des", "Outros": "des", "Investimentos": "inv"
         };
 
         let currentMonthKey = "";
         let categoryChartInstance = null;
         let pendingConfirmAction = null;
+        let realTimeCloudTimer = null;
 
         function safeCreateIcons() {
             if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') {
@@ -1144,136 +1144,73 @@
             }
         }
 
-        // Init App Engine
         window.addEventListener('DOMContentLoaded', async () => {
             initPWA();
-            initUsersStorage();
+            await syncFromCloudRealtime();
             populateLoginUserSelect();
-            await syncCloudDatabaseOnStartup();
-            checkCurrentSession();
+            startRealTimeCloudPolling();
             safeCreateIcons();
         });
 
-        // Populate User Select Box in Login
-        function populateLoginUserSelect() {
-            const select = document.getElementById('loginUserSelect');
-            if (!select) return;
-            
-            const selectedVal = select.value;
-            select.innerHTML = '';
-
-            registeredUsers.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id;
-                opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : '');
-                select.appendChild(opt);
-            });
-
-            if (selectedVal && Array.from(select.options).some(o => o.value === selectedVal)) {
-                select.value = selectedVal;
-            }
-        }
-
-        // CLOUD DATABASE SYNC ENGINE (UNIFIED MULTI-DEVICE CLOUD BIN)
-        async function syncCloudDatabaseOnStartup() {
+        // PURE CLOUD ENGINE - 100% REALTIME READ & WRITE (NO LOCALSTORAGE)
+        async function syncFromCloudRealtime() {
             updateCloudUIState('syncing');
             try {
-                let binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY) || SHARED_MASTER_BIN_ID;
-                
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${binId}/latest`, {
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}/latest`, {
                     method: 'GET',
                     headers: {
                         'X-Master-Key': CLOUD_MASTER_KEY,
                         'X-Access-Key': CLOUD_ACCESS_KEY
-                    }
+                    },
+                    cache: 'no-store'
                 });
 
                 if (res.ok) {
                     const data = await res.json();
                     const record = data.record;
                     if (record) {
-                        // Merge users array
                         if (record.users && Array.isArray(record.users)) {
-                            const mergedUsersMap = new Map();
-                            // Keep default owner
-                            mergedUsersMap.set(OWNER_USER.id, OWNER_USER);
-                            
-                            // Add local users
-                            registeredUsers.forEach(u => mergedUsersMap.set(u.id, u));
-                            // Add cloud users
-                            record.users.forEach(u => mergedUsersMap.set(u.id, u));
-
-                            registeredUsers = Array.from(mergedUsersMap.values());
-                            saveUsersToLocalStorageOnly();
+                            const map = new Map();
+                            map.set(OWNER_USER.id, OWNER_USER);
+                            record.users.forEach(u => map.set(u.id, u));
+                            registeredUsers = Array.from(map.values());
                             populateLoginUserSelect();
                         }
 
-                        // Load current user data if logged in
-                        if (currentUser && record.allUserData && record.allUserData[currentUser.id]) {
-                            appData = record.allUserData[currentUser.id];
-                            if (!appData.goals) appData.goals = [];
-                            localStorage.setItem(getUserStorageKey(), JSON.stringify(appData));
+                        if (record.allUserData) {
+                            allCloudUserDataMap = record.allUserData;
+                            if (currentUser && allCloudUserDataMap[currentUser.id]) {
+                                appData = allCloudUserDataMap[currentUser.id];
+                                if (!appData.goals) appData.goals = [];
+                                if (!appData.budgets) appData.budgets = {};
+                                updateUI();
+                            }
                         }
                     }
-                    localStorage.setItem(CLOUD_BIN_ID_STORAGE_KEY, binId);
                     updateCloudUIState('synced');
-                } else if (res.status === 404) {
-                    // Create primary master bin if first run
-                    const masterState = {
-                        users: registeredUsers,
-                        allUserData: {}
-                    };
-                    const createRes = await fetch(JSONBIN_ENDPOINT, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Master-Key': CLOUD_MASTER_KEY,
-                            'X-Access-Key': CLOUD_ACCESS_KEY,
-                            'X-Bin-Name': 'innovae_financas_pro_db_shared'
-                        },
-                        body: JSON.stringify(masterState)
-                    });
-                    if (createRes.ok) {
-                        const createData = await createRes.json();
-                        localStorage.setItem(CLOUD_BIN_ID_STORAGE_KEY, createData.metadata.id);
-                        updateCloudUIState('synced');
-                    } else {
-                        updateCloudUIState('local');
-                    }
                 } else {
                     updateCloudUIState('local');
                 }
             } catch(e) {
-                console.warn('Cloud API Sync using local fallback:', e);
+                console.warn('Realtime cloud sync polling error:', e);
                 updateCloudUIState('local');
             }
         }
 
         async function pushDataToCloud() {
-            let binId = localStorage.getItem(CLOUD_BIN_ID_STORAGE_KEY) || SHARED_MASTER_BIN_ID;
-            if (!binId) return;
-
             updateCloudUIState('syncing');
             try {
-                const allUserData = {};
-                registeredUsers.forEach(u => {
-                    const stored = localStorage.getItem(`innovae_user_data_${u.id}`);
-                    if (stored) {
-                        try { allUserData[u.id] = JSON.parse(stored); } catch(e){}
-                    }
-                });
-
                 if (currentUser) {
-                    allUserData[currentUser.id] = appData;
+                    allCloudUserDataMap[currentUser.id] = appData;
                 }
 
                 const payload = {
                     users: registeredUsers,
-                    allUserData: allUserData,
+                    allUserData: allCloudUserDataMap,
                     updatedAt: new Date().toISOString()
                 };
 
-                const res = await fetch(`${JSONBIN_ENDPOINT}/${binId}`, {
+                const res = await fetch(`${JSONBIN_ENDPOINT}/${SHARED_MASTER_BIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1293,6 +1230,14 @@
             }
         }
 
+        function startRealTimeCloudPolling() {
+            if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
+            // Fast real-time sync loop every 5 seconds
+            realTimeCloudTimer = setInterval(async () => {
+                await syncFromCloudRealtime();
+            }, 5000);
+        }
+
         function updateCloudUIState(state) {
             const badge = document.getElementById('cloudSyncBadge');
             const text = document.getElementById('cloudStatusText');
@@ -1300,17 +1245,35 @@
 
             if (state === 'syncing') {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-yellow-400/50 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-yellow-400 cloud-syncing";
-                text.textContent = "Sincronizando Nuvem...";
+                text.textContent = "Sincronizando Nuvem ⚡";
             } else if (state === 'synced') {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-emerald-400";
-                text.textContent = "Nuvem Conectada ☁️";
+                text.textContent = "Nuvem em Tempo Real ⚡";
             } else {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-zinc-400";
-                text.textContent = "Modo Local";
+                text.textContent = "Reconectando Nuvem...";
             }
         }
 
-        // Dynamic PWA Setup
+        function populateLoginUserSelect() {
+            const select = document.getElementById('loginUserSelect');
+            if (!select) return;
+            
+            const selectedVal = select.value;
+            select.innerHTML = '';
+
+            registeredUsers.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = u.name + (u.role === 'owner' ? ' (proprietário)' : (u.role === 'admin' ? ' (admin)' : ''));
+                select.appendChild(opt);
+            });
+
+            if (selectedVal && Array.from(select.options).some(o => o.value === selectedVal)) {
+                select.value = selectedVal;
+            }
+        }
+
         function initPWA() {
             try {
                 const manifest = {
@@ -1322,17 +1285,8 @@
                     theme_color: "#09090b",
                     orientation: "portrait",
                     icons: [
-                        {
-                            src: "LOGO.png",
-                            sizes: "192x192",
-                            type: "image/png",
-                            purpose: "any maskable"
-                        },
-                        {
-                            src: "LOGO.png",
-                            sizes: "512x512",
-                            type: "image/png"
-                        }
+                        { src: "LOGO.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                        { src: "LOGO.png", sizes: "512x512", type: "image/png" }
                     ]
                 };
 
@@ -1361,94 +1315,76 @@
             }
         }
 
-        function saveUsersToLocalStorageOnly() {
-            localStorage.setItem(SYSTEM_USERS_KEY, JSON.stringify(registeredUsers));
-        }
+        function handleLogin(e) {
+            e.preventDefault();
+            const selectedUserId = document.getElementById('loginUserSelect').value;
+            const inputPass = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
 
-        async function saveUsersToStorage() {
-            saveUsersToLocalStorageOnly();
-            populateLoginUserSelect();
-            await pushDataToCloud();
-        }
+            const user = registeredUsers.find(u => u.id === selectedUserId && u.password === inputPass);
 
-        function getUserStorageKey() {
-            return currentUser ? `innovae_user_data_${currentUser.id}` : 'innovae_financas_pro_data';
-        }
-
-        function saveToStorage() {
-            if (!currentUser) return;
-            localStorage.setItem(getUserStorageKey(), JSON.stringify(appData));
-            pushDataToCloud();
-        }
-
-        function loadFromStorage() {
-            if (!currentUser) return;
-            const key = getUserStorageKey();
-            let stored = localStorage.getItem(key);
-            
-            if (stored) {
-                try {
-                    appData = JSON.parse(stored);
+            if (user) {
+                errorEl.classList.add('hidden');
+                currentUser = user;
+                
+                if (allCloudUserDataMap[currentUser.id]) {
+                    appData = allCloudUserDataMap[currentUser.id];
                     if (!appData.goals) appData.goals = [];
-                } catch(e) {}
-            } else {
-                appData = {
-                    salaries: {},
-                    transactions: [],
-                    goals: [],
-                    budgets: {
-                        "Moradia": 0, "Alimentação": 0, "Transporte": 0, "Saúde": 0,
-                        "Lazer": 0, "Educação": 0, "Investimentos": 0, "Outros": 0
-                    }
-                };
-            }
-        }
-
-        function initUsersStorage() {
-            const storedUsers = localStorage.getItem(SYSTEM_USERS_KEY);
-            if (storedUsers) {
-                try {
-                    registeredUsers = JSON.parse(storedUsers);
-                } catch(e) {
-                    registeredUsers = [OWNER_USER];
+                } else {
+                    appData = { salaries: {}, transactions: [], goals: [], budgets: {} };
                 }
+
+                playWelcomeAnimation(() => {
+                    startUserSession(true);
+                    showToast(`Bem-vindo, ${currentUser.name}!`, 'success');
+                });
             } else {
-                registeredUsers = [OWNER_USER];
-                saveUsersToLocalStorageOnly();
-            }
-
-            if (!registeredUsers.some(u => u.id === OWNER_USER.id || u.username === OWNER_USER.username)) {
-                registeredUsers.unshift(OWNER_USER);
-                saveUsersToLocalStorageOnly();
+                errorEl.classList.remove('hidden');
             }
         }
 
-        function checkCurrentSession() {
-            const savedSession = localStorage.getItem(CURRENT_SESSION_KEY);
-            if (savedSession) {
-                try {
-                    const sessionUser = JSON.parse(savedSession);
-                    const exists = registeredUsers.find(u => u.id === sessionUser.id);
-                    if (exists) {
-                        currentUser = exists;
-                        startUserSession(false);
-                        return;
-                    }
-                } catch(e) {}
+        function playWelcomeAnimation(callback) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const greeting = document.getElementById('welcomeUserGreeting');
+            const pBar = document.getElementById('welcomeProgressBar');
+
+            if (!overlay) {
+                if (callback) callback();
+                return;
             }
 
-            showLoginScreen();
+            greeting.textContent = `Bem-vindo(a), ${currentUser.name}!`;
+            pBar.style.width = '0%';
+            overlay.classList.remove('hidden');
+
+            safeCreateIcons();
+
+            setTimeout(() => { pBar.style.width = '100%'; }, 100);
+
+            setTimeout(() => {
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('opacity-0');
+                    if (callback) callback();
+                }, 400);
+            }, 2000);
         }
 
-        function showLoginScreen() {
-            populateLoginUserSelect();
+        function handleLogout() {
+            pushDataToCloud();
+            currentUser = null;
+            document.getElementById('loginPassword').value = '';
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('dashboardScreen').classList.add('hidden');
+            
             const mobileNav = document.getElementById('mobileBottomNav');
             if (mobileNav) {
                 mobileNav.classList.add('hidden');
                 mobileNav.classList.remove('flex');
             }
+
+            showToast('Você saiu do sistema.', 'info');
         }
 
         function startUserSession(isNewLogin = false) {
@@ -1465,29 +1401,33 @@
             document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
             
             const isOwner = currentUser.role === 'owner';
+            const isAdmin = currentUser.role === 'admin' || isOwner;
             const ownerTag = document.getElementById('ownerTag');
             const btnAdminUsers = document.getElementById('btnAdminUsers');
 
             if (isOwner) {
                 ownerTag.classList.remove('hidden');
-                btnAdminUsers.classList.remove('hidden');
                 document.getElementById('headerUserRole').textContent = 'Proprietário do Sistema';
             } else {
                 ownerTag.classList.add('hidden');
-                btnAdminUsers.classList.add('hidden');
                 document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Administrador' : 'Usuário Padrão';
             }
 
-            loadFromStorage();
+            if (isAdmin) {
+                btnAdminUsers.classList.remove('hidden');
+            } else {
+                btnAdminUsers.classList.add('hidden');
+            }
+
             initCurrentMonth();
             updateUI(isNewLogin);
             safeCreateIcons();
         }
 
-        // Owner-Only User Management
+        // Admin User Management Logic
         function openUsersAdminModal() {
-            if (currentUser.role !== 'owner') {
-                showToast('Acesso negado: Apenas o proprietário pode acessar este painel.', 'red');
+            if (currentUser.role !== 'owner' && currentUser.role !== 'admin') {
+                showToast('Acesso negado: Apenas administradores podem gerenciar usuários.', 'red');
                 return;
             }
             renderUsersList();
@@ -1518,7 +1458,7 @@
                         <button onclick="openEditUserModal('${u.id}')" class="text-yellow-400 hover:text-yellow-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Editar Usuário">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                         </button>
-                        ${isOwner ? '' : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Excluir Usuário"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`}
+                        ${isOwner ? '<span class="text-zinc-500 italic text-[10px] ml-1">Proprietário</span>' : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition" title="Excluir Usuário"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`}
                     </div>
                 `;
 
@@ -1578,155 +1518,20 @@
 
             if (currentUser && currentUser.id === userId) {
                 currentUser = registeredUsers[userIndex];
-                localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(currentUser));
                 document.getElementById('headerUserName').textContent = currentUser.name;
                 document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
             }
 
-            await saveUsersToStorage();
+            await pushDataToCloud();
             closeEditUserModal();
             renderUsersList();
             populateLoginUserSelect();
-            showToast(`Dados do usuário ${name} atualizados e salvos na nuvem! ☁️`, 'success');
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const selectedUserId = document.getElementById('loginUserSelect').value;
-            const inputPass = document.getElementById('loginPassword').value.trim();
-            const errorEl = document.getElementById('loginError');
-
-            const user = registeredUsers.find(u => u.id === selectedUserId && u.password === inputPass);
-
-            if (user) {
-                errorEl.classList.add('hidden');
-                currentUser = user;
-                localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(currentUser));
-                
-                playWelcomeAnimation(() => {
-                    startUserSession(true);
-                    showToast(`Bem-vindo, ${currentUser.name}!`, 'success');
-                });
-            } else {
-                errorEl.classList.remove('hidden');
-            }
-        }
-
-        // Welcome Splash Screen Animation Controller
-        function playWelcomeAnimation(callback) {
-            const overlay = document.getElementById('welcomeOverlay');
-            const greeting = document.getElementById('welcomeUserGreeting');
-            const pBar = document.getElementById('welcomeProgressBar');
-
-            if (!overlay) {
-                if (callback) callback();
-                return;
-            }
-
-            greeting.textContent = `Bem-vindo(a), ${currentUser.name}!`;
-            pBar.style.width = '0%';
-            overlay.classList.remove('hidden');
-
-            safeCreateIcons();
-
-            setTimeout(() => {
-                pBar.style.width = '100%';
-            }, 100);
-
-            setTimeout(() => {
-                overlay.classList.add('opacity-0');
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    overlay.classList.remove('opacity-0');
-                    if (callback) callback();
-                }, 400);
-            }, 2000);
-        }
-
-        function handleLogout() {
-            saveToStorage();
-            currentUser = null;
-            localStorage.removeItem(CURRENT_SESSION_KEY);
-            document.getElementById('loginPassword').value = '';
-            showLoginScreen();
-            showToast('Você saiu do sistema.', 'info');
-        }
-
-        function startUserSession(isNewLogin = false) {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-
-            document.getElementById('headerUserName').textContent = currentUser.name;
-            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
-            
-            const isOwner = currentUser.role === 'owner';
-            const ownerTag = document.getElementById('ownerTag');
-            const btnAdminUsers = document.getElementById('btnAdminUsers');
-
-            if (isOwner) {
-                ownerTag.classList.remove('hidden');
-                btnAdminUsers.classList.remove('hidden');
-                document.getElementById('headerUserRole').textContent = 'Proprietário do Sistema';
-            } else {
-                ownerTag.classList.add('hidden');
-                btnAdminUsers.classList.add('hidden');
-                document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Administrador' : 'Usuário Padrão';
-            }
-
-            loadFromStorage();
-            initCurrentMonth();
-            updateUI(isNewLogin);
-            safeCreateIcons();
-        }
-
-        // Owner-Only User Management
-        function openUsersAdminModal() {
-            if (currentUser.role !== 'owner') {
-                showToast('Acesso negado: Apenas o proprietário pode acessar este painel.', 'red');
-                return;
-            }
-            renderUsersList();
-            document.getElementById('usersAdminModal').classList.remove('hidden');
-        }
-
-        function closeUsersAdminModal() {
-            document.getElementById('usersAdminModal').classList.add('hidden');
-        }
-
-        function renderUsersList() {
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-
-            registeredUsers.forEach(u => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-zinc-900 transition";
-                
-                const isOwner = u.role === 'owner';
-                const roleBadge = isOwner 
-                    ? `<span class="px-2 py-0.5 rounded bg-yellow-400/20 text-yellow-400 border border-yellow-400/30 font-bold">Proprietário</span>`
-                    : (u.role === 'admin' 
-                        ? `<span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30 font-bold">Admin</span>`
-                        : `<span class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">Padrão</span>`);
-
-                const actions = isOwner 
-                    ? `<span class="text-zinc-500 italic text-[10px]">Protegido</span>`
-                    : `<button onclick="askDeleteUser('${u.id}')" class="text-red-400 hover:text-red-300 font-bold p-1 hover:bg-zinc-800 rounded transition"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>`;
-
-                tr.innerHTML = `
-                    <td class="py-2.5 px-3 font-semibold text-zinc-100">${u.name}</td>
-                    <td class="py-2.5 px-3 text-zinc-400">${u.username}</td>
-                    <td class="py-2.5 px-3">${roleBadge}</td>
-                    <td class="py-2.5 px-3 text-center">${actions}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            safeCreateIcons();
+            showToast(`Dados de ${name} salvos na nuvem! ⚡`, 'success');
         }
 
         async function handleAddNewUser(e) {
             e.preventDefault();
-            if (currentUser.role !== 'owner') return;
+            if (currentUser.role !== 'owner' && currentUser.role !== 'admin') return;
 
             const name = document.getElementById('newFullName').value.trim();
             const username = document.getElementById('newUsername').value.trim();
@@ -1748,21 +1553,21 @@
             };
 
             registeredUsers.push(newUser);
-            await saveUsersToStorage();
+            await pushDataToCloud();
             
             document.getElementById('addUserForm').reset();
             renderUsersList();
-            showToast(`Usuário ${name} cadastrado e salvo na nuvem com sucesso! ☁️`, 'success');
+            showToast(`Usuário ${name} cadastrado na nuvem! ⚡`, 'success');
         }
 
         function askDeleteUser(userId) {
             const u = registeredUsers.find(x => x.id === userId);
             if (!u || u.role === 'owner') return;
 
-            showConfirmModal('Excluir Usuário', `Tem certeza que deseja excluir o usuário "${u.name}"? Todos os dados deste usuário serão perdidos.`, async () => {
+            showConfirmModal('Excluir Usuário', `Tem certeza que deseja excluir o usuário "${u.name}" da nuvem? Todos os dados dele serão apagados.`, async () => {
                 registeredUsers = registeredUsers.filter(x => x.id !== userId);
-                await saveUsersToStorage();
-                localStorage.removeItem(`innovae_user_data_${userId}`);
+                delete allCloudUserDataMap[userId];
+                await pushDataToCloud();
                 renderUsersList();
                 showToast('Usuário removido da nuvem com sucesso.', 'warning');
             });
@@ -1797,7 +1602,6 @@
             return dateStr;
         }
 
-        // Smooth Number Count-Up Animation Engine
         function animateValue(elementId, targetVal, duration = 800) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -1824,7 +1628,6 @@
             requestAnimationFrame(updateNumber);
         }
 
-        // Calculations & UI Updates
         function updateUI(animateNumbers = false) {
             const currentSalary = appData.salaries[currentMonthKey] || 0;
             const monthTransactions = appData.transactions.filter(t => t.date.startsWith(currentMonthKey));
@@ -1923,7 +1726,6 @@
                 progressBar.className = "bg-yellow-400 h-2 rounded-full transition-all duration-700 ease-out";
             }
 
-            // Update Goals Overview Summary Banner
             let totalSavedInGoals = 0;
             (appData.goals || []).forEach(g => totalSavedInGoals += (parseFloat(g.currentAmount) || 0));
             document.getElementById('cardTotalGoalsSaved').textContent = formatBRL(totalSavedInGoals);
@@ -2006,7 +1808,6 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: { animateRotate: true, animateScale: true },
                         plugins: { legend: { display: false } }
                     }
                 });
@@ -2032,11 +1833,6 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true,
-                        duration: 1000
-                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -2099,7 +1895,6 @@
             return 'a_vista';
         }
 
-        // Render Transactions Engine
         function renderTransactions() {
             const tbody = document.getElementById('transactionTableBody');
             const mobileContainer = document.getElementById('mobileTransactionCards');
@@ -2280,17 +2075,16 @@
             safeCreateIcons();
         }
 
-        function toggleTxStatus(id) {
+        async function toggleTxStatus(id) {
             const tx = appData.transactions.find(t => t.id === id);
             if (tx) {
                 tx.status = tx.status === 'pago' ? 'pendente' : 'pago';
-                saveToStorage();
+                await pushDataToCloud();
                 updateUI();
-                showToast(`Status alterado para: ${tx.status === 'pago' ? 'Pago' : 'Pendente'}`, 'info');
+                showToast(`Status na nuvem alterado: ${tx.status === 'pago' ? 'Pago' : 'Pendente'} ⚡`, 'info');
             }
         }
 
-        // Modals Logic
         function openSalaryModal() {
             const currentSalary = appData.salaries[currentMonthKey] || 0;
             document.getElementById('inputBaseSalary').value = currentSalary > 0 ? currentSalary : '';
@@ -2301,14 +2095,14 @@
             document.getElementById('salaryModal').classList.add('hidden');
         }
 
-        function saveSalary(e) {
+        async function saveSalary(e) {
             e.preventDefault();
             const val = parseFloat(document.getElementById('inputBaseSalary').value) || 0;
             appData.salaries[currentMonthKey] = val;
-            saveToStorage();
+            await pushDataToCloud();
             closeSalaryModal();
             updateUI(true);
-            showToast('Salário atualizado com sucesso! 💰', 'success');
+            showToast('Salário atualizado na nuvem em tempo real! ⚡', 'success');
         }
 
         function openTransactionModal(editId = null) {
@@ -2386,11 +2180,9 @@
             toggleInstallmentFields();
         }
 
-        function toggleTxTypeStyle() {
-            // Handled via CSS peer styles
-        }
+        function toggleTxTypeStyle() {}
 
-        function saveTransaction(e) {
+        async function saveTransaction(e) {
             e.preventDefault();
             const editId = document.getElementById('editTransactionId').value;
             const description = document.getElementById('txDescription').value;
@@ -2426,7 +2218,7 @@
                         paymentMethod,
                         ...(isInstallment ? { totalInstallments, currentInstallment } : {})
                     };
-                    showToast('Transação atualizada!', 'success');
+                    showToast('Transação atualizada na nuvem! ⚡', 'success');
                 }
             } else {
                 if (isInstallment && autoPropagate && totalInstallments > 1) {
@@ -2458,7 +2250,7 @@
                             totalInstallments: totalInstallments
                         });
                     }
-                    showToast(`${totalInstallments - currentInstallment + 1} parcelas geradas com sucesso! 💳`, 'success');
+                    showToast(`${totalInstallments - currentInstallment + 1} parcelas salvas na nuvem! ⚡`, 'success');
                 } else {
                     const newTx = {
                         id: Date.now().toString(),
@@ -2477,11 +2269,11 @@
                         } : {})
                     };
                     appData.transactions.push(newTx);
-                    showToast('Transação adicionada! ⚡', 'success');
+                    showToast('Transação salva na nuvem! ⚡', 'success');
                 }
             }
 
-            saveToStorage();
+            await pushDataToCloud();
             closeTransactionModal();
             updateUI(true);
         }
@@ -2490,15 +2282,14 @@
             const tx = appData.transactions.find(t => t.id === id);
             if (!tx) return;
 
-            showConfirmModal('Excluir Lançamento', `Deseja apagar a transação "${tx.description}"?`, () => {
+            showConfirmModal('Excluir Lançamento', `Deseja apagar a transação "${tx.description}" da nuvem?`, async () => {
                 appData.transactions = appData.transactions.filter(t => t.id !== id);
-                saveToStorage();
+                await pushDataToCloud();
                 updateUI(true);
-                showToast('Transação excluída.', 'info');
+                showToast('Transação excluída da nuvem.', 'info');
             });
         }
 
-        // Goals / Planning Module Engine
         function openGoalsModal() {
             renderGoalsList();
             document.getElementById('goalsModal').classList.remove('hidden');
@@ -2516,8 +2307,10 @@
 
             if (goals.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-10">
-                        <i data-lucide="target" class="w-10 h-10 text-emerald-400/50 mx-auto mb-2 animate-bounce"></i>
+                    <div class="text-center py-10 flex flex-col items-center">
+                        <div class="w-24 h-24 mb-2">
+                            <lottie-player src="https://assets4.lottiefiles.com/packages/lf20_mbe9u1ff.json" background="transparent" speed="1" loop autoplay></lottie-player>
+                        </div>
                         <p class="text-xs text-zinc-400 font-bold">Nenhuma meta de investimento cadastrada.</p>
                         <p class="text-[11px] text-zinc-500 mt-0.5">Cadastre objetivos como "Reserva de Emergência", "Viagem" ou "Carro Novo".</p>
                     </div>
@@ -2588,7 +2381,7 @@
             safeCreateIcons();
         }
 
-        function handleSaveGoal(e) {
+        async function handleSaveGoal(e) {
             e.preventDefault();
             const name = document.getElementById('goalName').value.trim();
             const targetAmount = parseFloat(document.getElementById('goalTargetAmount').value) || 0;
@@ -2606,15 +2399,15 @@
             };
 
             appData.goals.push(newGoal);
-            saveToStorage();
+            await pushDataToCloud();
 
             document.getElementById('goalForm').reset();
             renderGoalsList();
             updateUI(true);
-            showToast('Nova meta cadastrada com sucesso! 🎯', 'success');
+            showToast('Nova meta cadastrada na nuvem! ⚡', 'success');
         }
 
-        function promptDepositGoal(goalId) {
+        async function promptDepositGoal(goalId) {
             const goal = (appData.goals || []).find(g => g.id === goalId);
             if (!goal) return;
 
@@ -2622,14 +2415,14 @@
             const val = parseFloat(valStr);
             if (val && !isNaN(val) && val > 0) {
                 goal.currentAmount = (parseFloat(goal.currentAmount) || 0) + val;
-                saveToStorage();
+                await pushDataToCloud();
                 renderGoalsList();
                 updateUI(true);
-                showToast(`R$ ${val.toFixed(2)} adicionados à meta ${goal.name}! 🚀`, 'success');
+                showToast(`R$ ${val.toFixed(2)} adicionados à meta na nuvem! ⚡`, 'success');
             }
         }
 
-        function promptWithdrawGoal(goalId) {
+        async function promptWithdrawGoal(goalId) {
             const goal = (appData.goals || []).find(g => g.id === goalId);
             if (!goal) return;
 
@@ -2642,10 +2435,10 @@
                     return;
                 }
                 goal.currentAmount = current - val;
-                saveToStorage();
+                await pushDataToCloud();
                 renderGoalsList();
                 updateUI(true);
-                showToast(`R$ ${val.toFixed(2)} resgatados.`, 'info');
+                showToast(`R$ ${val.toFixed(2)} resgatados da nuvem.`, 'info');
             }
         }
 
@@ -2653,16 +2446,15 @@
             const goal = (appData.goals || []).find(g => g.id === goalId);
             if (!goal) return;
 
-            showConfirmModal('Excluir Meta', `Tem certeza que deseja excluir a meta "${goal.name}"?`, () => {
+            showConfirmModal('Excluir Meta', `Tem certeza que deseja excluir a meta "${goal.name}" da nuvem?`, async () => {
                 appData.goals = appData.goals.filter(g => g.id !== goalId);
-                saveToStorage();
+                await pushDataToCloud();
                 renderGoalsList();
                 updateUI(true);
-                showToast('Meta removida.', 'info');
+                showToast('Meta removida da nuvem.', 'info');
             });
         }
 
-        // Debts Modal Logic
         function openDebtsModal() {
             const container = document.getElementById('debtsListContainer');
             container.innerHTML = '';
@@ -2756,16 +2548,15 @@
         }
 
         function askDeleteDebtGroup(groupId) {
-            showConfirmModal('Excluir Dívida / Parcelamento', 'Deseja apagar todas as parcelas associadas a este grupo?', () => {
+            showConfirmModal('Excluir Dívida / Parcelamento', 'Deseja apagar todas as parcelas associadas a este grupo na nuvem?', async () => {
                 appData.transactions = appData.transactions.filter(t => t.installmentGroup !== groupId);
-                saveToStorage();
+                await pushDataToCloud();
                 openDebtsModal();
                 updateUI(true);
-                showToast('Parcelamento removido.', 'info');
+                showToast('Parcelamento removido da nuvem.', 'info');
             });
         }
 
-        // Budgets Modal Logic
         function openBudgetsModal() {
             const container = document.getElementById('budgetInputsContainer');
             container.innerHTML = '';
@@ -2788,7 +2579,7 @@
             document.getElementById('budgetsModal').classList.add('hidden');
         }
 
-        function saveBudgets(e) {
+        async function saveBudgets(e) {
             e.preventDefault();
             categories.forEach(cat => {
                 const input = document.querySelector(`input[name="budget_${cat}"]`);
@@ -2796,13 +2587,12 @@
                     appData.budgets[cat] = parseFloat(input.value) || 0;
                 }
             });
-            saveToStorage();
+            await pushDataToCloud();
             closeBudgetsModal();
             updateUI(true);
-            showToast('Metas de orçamento atualizadas!', 'success');
+            showToast('Metas de orçamento salvas na nuvem!', 'success');
         }
 
-        // Confirmation Modal Engine
         function showConfirmModal(title, text, callback) {
             document.getElementById('confirmModalTitle').textContent = title;
             document.getElementById('confirmModalText').textContent = text;
@@ -2818,7 +2608,6 @@
             pendingConfirmAction = null;
         }
 
-        // Data Backup / Restore Engine
         function toggleDataMenu() {
             const menu = document.getElementById('dataMenu');
             menu.classList.toggle('hidden');
@@ -2828,12 +2617,12 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `innovae_financas_backup_${currentUser.username}_${currentMonthKey}.json`);
+            downloadAnchor.setAttribute("download", `innovae_financas_cloud_backup_${currentUser.username}_${currentMonthKey}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
             toggleDataMenu();
-            showToast('Backup exportado com sucesso!', 'success');
+            showToast('Backup JSON exportado!', 'success');
         }
 
         function exportCSV() {
@@ -2862,15 +2651,15 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = async function(event) {
                 try {
                     const imported = JSON.parse(event.target.result);
                     if (imported && imported.transactions) {
                         appData = imported;
                         if (!appData.goals) appData.goals = [];
-                        saveToStorage();
+                        await pushDataToCloud();
                         updateUI(true);
-                        showToast('Dados importados com sucesso!', 'success');
+                        showToast('Dados importados e salvos na nuvem!', 'success');
                     } else {
                         showToast('Arquivo JSON inválido.', 'red');
                     }
@@ -2884,15 +2673,14 @@
 
         function askResetData() {
             toggleDataMenu();
-            showConfirmModal('Resetar Meus Dados', 'Tem certeza que deseja apagar todas as suas transações e dados financeiros deste usuário?', () => {
+            showConfirmModal('Resetar Meus Dados', 'Tem certeza que deseja apagar todas as suas transações da nuvem para este usuário?', async () => {
                 appData = { salaries: {}, transactions: [], goals: [], budgets: { "Moradia": 0, "Alimentação": 0, "Transporte": 0, "Saúde": 0, "Lazer": 0, "Educação": 0, "Investimentos": 0, "Outros": 0 } };
-                saveToStorage();
+                await pushDataToCloud();
                 updateUI(true);
-                showToast('Seus dados foram resetados.', 'warning');
+                showToast('Seus dados na nuvem foram resetados.', 'warning');
             });
         }
 
-        // Toast Engine
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
