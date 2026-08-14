@@ -280,6 +280,10 @@
                 <div id="loginError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 p-2.5 rounded-xl font-semibold text-center">
                     Senha incorreta. Tente novamente.
                 </div>
+                <button type="button" id="retryCloudButton" onclick="retryCloudConnection()" class="hidden w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-bold py-2.5 rounded-xl transition">
+                    Tentar conexão com a nuvem novamente
+                </button>
+                <button type="button" id="cloudDiagnosticButton" onclick="showCloudDiagnostic()" class="hidden w-full text-xs text-zinc-500 hover:text-zinc-300 py-1 transition">Ver diagnóstico técnico</button>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-zinc-950 font-black py-3 rounded-xl transition duration-200 shadow-lg shadow-yellow-500/20 active:scale-95 flex items-center justify-center gap-2 group">
                     <span>Acessar o Painel em Nuvem</span>
@@ -1342,50 +1346,108 @@
             }, 28);
         }
 
-        async function cloudFetch(path, options = {}) {
+        // JSONBin authentication: probe both supplied keys and both supported header types.
+        // This removes any dependency on the order in which the user pasted the keys.
+        let cloudAuth = null;
+        let cloudLastError = '';
+
+        async function readCloudError(response) {
+            try {
+                const body = await response.clone().json();
+                return body?.message || body?.error || `HTTP ${response.status}`;
+            } catch (_) {
+                try {
+                    const text = await response.clone().text();
+                    return text?.trim() || `HTTP ${response.status}`;
+                } catch (_) {
+                    return `HTTP ${response.status}`;
+                }
+            }
+        }
+
+        async function requestWithAuth(path, options, headerName, key) {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 12000);
-
-            async function doRequest(authHeader) {
+            try {
                 const headers = new Headers(options.headers || {});
                 headers.delete('X-Master-Key');
                 headers.delete('X-Access-Key');
-                headers.set(authHeader.name, authHeader.value);
-                return fetch(`${JSONBIN_ENDPOINT}/${path}`, {
+                headers.set(headerName, key);
+                return await fetch(`${JSONBIN_ENDPOINT}/${path}`, {
                     ...options,
                     headers,
                     cache: 'no-store',
                     credentials: 'omit',
                     signal: controller.signal
                 });
+            } finally {
+                clearTimeout(timeout);
+            }
+        }
+
+        async function discoverCloudAuth() {
+            if (cloudAuth) return cloudAuth;
+
+            const candidates = [
+                { name: 'X-Master-Key', key: CLOUD_MASTER_KEY, label: 'Chave 1 / Master' },
+                { name: 'X-Master-Key', key: CLOUD_ACCESS_KEY, label: 'Chave 2 / Master' },
+                { name: 'X-Access-Key', key: CLOUD_ACCESS_KEY, label: 'Chave 2 / Access' },
+                { name: 'X-Access-Key', key: CLOUD_MASTER_KEY, label: 'Chave 1 / Access' }
+            ];
+
+            const errors = [];
+            for (const candidate of candidates) {
+                try {
+                    const response = await requestWithAuth(
+                        `${SHARED_MASTER_BIN_ID}/latest?cb=${Date.now()}`,
+                        { method: 'GET' },
+                        candidate.name,
+                        candidate.key
+                    );
+
+                    if (response.ok) {
+                        cloudAuth = candidate;
+                        cloudLastError = '';
+                        return candidate;
+                    }
+
+                    errors.push(`${candidate.label}: ${await readCloudError(response)}`);
+                } catch (error) {
+                    errors.push(`${candidate.label}: ${error?.name === 'AbortError' ? 'tempo limite de 12s' : (error?.message || 'erro de rede')}`);
+                }
             }
 
-            try {
-                // First attempt with the Access Key. If the key does not have
-                // permission for the requested operation, retry with the Master Key.
-                let response = await doRequest({ name: 'X-Access-Key', value: CLOUD_ACCESS_KEY });
+            cloudLastError = errors.join(' | ');
+            throw new Error(`Não foi possível autenticar no JSONBin. ${cloudLastError}`);
+        }
 
-                if (response.status === 401 || response.status === 403) {
-                    response = await doRequest({ name: 'X-Master-Key', value: CLOUD_MASTER_KEY });
+        async function cloudFetch(path, options = {}) {
+            if (!cloudAuth) await discoverCloudAuth();
+
+            try {
+                let response = await requestWithAuth(path, options, cloudAuth.name, cloudAuth.key);
+
+                // If a previously valid credential was revoked, clear it and rediscover once.
+                if ((response.status === 401 || response.status === 403) && cloudAuth) {
+                    cloudAuth = null;
+                    await discoverCloudAuth();
+                    response = await requestWithAuth(path, options, cloudAuth.name, cloudAuth.key);
                 }
 
                 if (!response.ok) {
-                    let detail = '';
-                    try {
-                        const body = await response.clone().json();
-                        detail = body?.message ? ` — ${body.message}` : '';
-                    } catch (_) {}
-                    throw new Error(`Cloud HTTP ${response.status}${detail}`);
+                    const detail = await readCloudError(response);
+                    cloudLastError = `HTTP ${response.status}: ${detail}`;
+                    throw new Error(cloudLastError);
                 }
 
                 return response;
             } catch (error) {
                 if (error?.name === 'AbortError') {
-                    throw new Error('Tempo limite ao conectar à nuvem (12s).');
+                    cloudLastError = 'Tempo limite ao conectar à nuvem (12s).';
+                    throw new Error(cloudLastError);
                 }
+                cloudLastError = error?.message || 'Falha de conexão com a nuvem.';
                 throw error;
-            } finally {
-                clearTimeout(timeout);
             }
         }
 
@@ -1430,6 +1492,16 @@
                 window.cloudAvailable = false;
                 updateCloudUIState('error');
                 console.error('Falha de sincronização na nuvem:', error);
+                const loginCloudText = document.getElementById('loginCloudText');
+                const retryButton = document.getElementById('retryCloudButton');
+                if (loginCloudText) loginCloudText.textContent = 'Nuvem indisponível';
+                if (retryButton) retryButton.classList.remove('hidden');
+                document.getElementById('cloudDiagnosticButton')?.classList.remove('hidden');
+                const loginError = document.getElementById('loginError');
+                if (loginError && !currentUser) {
+                    loginError.textContent = `Nuvem indisponível: ${cloudLastError || error?.message || 'erro de conexão'}`;
+                    loginError.classList.remove('hidden');
+                }
                 return false;
             }
         }
@@ -1450,7 +1522,14 @@
 
         function startRealTimeCloudPolling() {
             if (realTimeCloudTimer) clearInterval(realTimeCloudTimer);
-            realTimeCloudTimer = setInterval(() => syncFromCloudRealtime(true), 2200);
+            realTimeCloudTimer = setInterval(() => {
+                const delay = consecutiveCloudErrors > 0 ? Math.min(15000, 2200 * Math.pow(2, Math.min(consecutiveCloudErrors, 3))) : 2200;
+                // The interval remains fixed by the browser; failed cycles self-throttle via a gate.
+                if (!window.__cloudPollGate || Date.now() >= window.__cloudPollGate) {
+                    window.__cloudPollGate = Date.now() + delay;
+                    syncFromCloudRealtime(true);
+                }
+            }, 1000);
         }
 
         async function pushDataToCloud() {
@@ -1522,15 +1601,36 @@
             } else {
                 badge.className = "flex items-center gap-1.5 bg-zinc-950 border border-red-500/40 rounded-xl px-3 py-1.5 shadow-inner text-xs font-bold text-red-400";
                 text.textContent = "Nuvem indisponível";
-                if (loginText) loginText.textContent = "Conexão com a nuvem indisponível";
+                if (loginText) {
+                    loginText.textContent = cloudLastError ? `Nuvem indisponível: ${cloudLastError.slice(0, 90)}` : "Conexão com a nuvem indisponível";
+                    loginText.parentElement?.setAttribute('title', cloudLastError || 'Falha ao conectar ao JSONBin');
+                }
                 if (dot) { dot.className = 'w-2 h-2 rounded-full bg-red-400'; }
             }
         }
 
         async function retryCloudConnection() {
+            const button = document.getElementById('retryCloudButton');
+            if (button) {
+                button.classList.remove('hidden');
+                button.disabled = true;
+                button.textContent = 'Testando conexão...';
+            }
+            cloudAuth = null;
             updateCloudUIState('syncing');
             const ok = await syncFromCloudRealtime(false);
-            if (!ok) showToast('A conexão com a nuvem ainda não respondeu. Verifique a chave de acesso do JSONBin e a internet.', 'red');
+            if (ok) {
+                if (button) { button.disabled = false; button.classList.add('hidden'); button.textContent = 'Tentar conexão com a nuvem novamente'; }
+                showToast('Conexão com a nuvem restabelecida. ⚡', 'success');
+            } else {
+                if (button) { button.disabled = false; button.textContent = 'Tentar conexão com a nuvem novamente'; }
+                showToast(`Falha na nuvem: ${cloudLastError || 'erro desconhecido'}`, 'red');
+            }
+        }
+
+        function showCloudDiagnostic() {
+            const details = cloudLastError || 'Nenhum detalhe de erro disponível.';
+            alert(`Diagnóstico JSONBin\n\nBin: ${SHARED_MASTER_BIN_ID}\nEndpoint: ${JSONBIN_ENDPOINT}\n\n${details}`);
         }
 
         async function handleLogin(e) {
@@ -1542,10 +1642,11 @@
             errorEl.classList.add('hidden');
 
             if (!window.cloudAvailable) {
-                await syncFromCloudRealtime(false);
+                await retryCloudConnection();
                 if (!window.cloudAvailable) {
-                    errorEl.textContent = 'Não foi possível conectar ao banco em nuvem. Verifique a conexão e tente novamente.';
+                    errorEl.textContent = `Nuvem indisponível: ${cloudLastError || 'verifique o JSONBin, o Bin ID e as chaves.'}`;
                     errorEl.classList.remove('hidden');
+                    document.getElementById('retryCloudButton')?.classList.remove('hidden');
                     return;
                 }
             }
@@ -1571,6 +1672,7 @@
         function handleLogout() {
             pushDataToCloud();
             currentUser = null;
+            cloudAuth = null;
             document.getElementById('loginPassword').value = '';
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('dashboardScreen').classList.add('hidden');
